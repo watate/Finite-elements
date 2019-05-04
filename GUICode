@@ -88,8 +88,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
             save('NL.mat', 'NL');
             save('x.mat', 'x');
             save('y.mat', 'y');
-            save('z.mat', 'z');
-            
             
         end
 
@@ -104,7 +102,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             
             [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(app.c.Value), round(app.d.Value), app.e.Value, app.ElementType.Value);
             
-            
+              
             NoN = size(NL, 1);
             NoE = size(EL, 1);
             NPE = size(EL, 2);
@@ -114,7 +112,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
                 for j = 1:NPE
                     x(j,i) = NL(nl(j), 1);
                     y(j,i) = NL(nl(j), 2);
-                    
                 end
             end
             
@@ -125,25 +122,14 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.Elements.Value = NoE;
             app.Nodes.Value = NoN;
             
+            
             %%% This part does the mesh for the coloured graph
-            for i = 1:NoE
-                nl = EL(i, 1:NPE);
-                for j = 1:NPE
-                    x(j,i) = NL(nl(j), 1);
-                    y(j,i) = NL(nl(j), 2);
-                    z(j, i) = 0;
-                    c(j, i) = x(j, i);
-                    
-                end
-            end
-            
-            patch(app.UIAxes_2, x, y, z, c);
-            
             save('EL.mat', 'EL');
             save('NL.mat', 'NL');
             save('x.mat', 'x');
             save('y.mat', 'y');
-            save('z.mat', 'z');
+            
+            PlotButtonPushed(app, event);
 
         end
 
@@ -152,6 +138,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
     
             load('EL.mat', 'EL');
             load('NL.mat', 'NL');
+            load('x.mat', 'x');
+            load('y.mat', 'y');
             
             NoN = size(NL, 1);
             NoE = size(EL, 1);
@@ -160,11 +148,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
             for i = 1:NoE
                 nl = EL(i, 1:NPE);
                 for j = 1:NPE
-                    x(j,i) = NL(nl(j), 1);
-                    y(j,i) = NL(nl(j), 2);
                     z(j, i) = 0;
                     c(j, i) = x(j, i);
-                    
                 end
             end
             
