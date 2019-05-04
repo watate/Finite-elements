@@ -2,40 +2,53 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                       matlab.ui.Figure
-        aEditFieldLabel                matlab.ui.control.Label
-        a                              matlab.ui.control.NumericEditField
-        bEditFieldLabel                matlab.ui.control.Label
-        b                              matlab.ui.control.NumericEditField
-        cEditFieldLabel                matlab.ui.control.Label
-        c                              matlab.ui.control.NumericEditField
-        dEditFieldLabel                matlab.ui.control.Label
-        d                              matlab.ui.control.NumericEditField
-        ElementTypeDropDownLabel       matlab.ui.control.Label
-        ElementType                    matlab.ui.control.DropDown
-        MeshCriteriaLabel              matlab.ui.control.Label
-        Button                         matlab.ui.control.Button
-        eEditFieldLabel                matlab.ui.control.Label
-        e                              matlab.ui.control.NumericEditField
-        UIAxes                         matlab.ui.control.UIAxes
-        GenerateButton                 matlab.ui.control.Button
-        ElementsEditFieldLabel         matlab.ui.control.Label
-        Elements                       matlab.ui.control.NumericEditField
-        NodesEditField_2Label          matlab.ui.control.Label
-        Nodes                          matlab.ui.control.NumericEditField
-        MeshRefinementSliderLabel      matlab.ui.control.Label
-        MeshRefinementSlider           matlab.ui.control.Slider
-        UIAxes_2                       matlab.ui.control.UIAxes
-        Plot                           matlab.ui.control.Button
-        ColorbarButtonGroup            matlab.ui.container.ButtonGroup
-        Button_2                       matlab.ui.control.ToggleButton
-        Button_3                       matlab.ui.control.ToggleButton
-        MaterialPropertieskEditFieldLabel  matlab.ui.control.Label
-        MaterialPropertieskEditField   matlab.ui.control.NumericEditField
-        PreProcessLabel                matlab.ui.control.Label
+        UIFigure                        matlab.ui.Figure
+        aEditFieldLabel                 matlab.ui.control.Label
+        a                               matlab.ui.control.NumericEditField
+        bEditFieldLabel                 matlab.ui.control.Label
+        b                               matlab.ui.control.NumericEditField
+        cEditFieldLabel                 matlab.ui.control.Label
+        c                               matlab.ui.control.NumericEditField
+        dEditFieldLabel                 matlab.ui.control.Label
+        d                               matlab.ui.control.NumericEditField
+        ElementTypeDropDownLabel        matlab.ui.control.Label
+        ElementType                     matlab.ui.control.DropDown
+        MeshCriteriaLabel               matlab.ui.control.Label
+        Button                          matlab.ui.control.Button
+        eEditFieldLabel                 matlab.ui.control.Label
+        e                               matlab.ui.control.NumericEditField
+        UIAxes                          matlab.ui.control.UIAxes
+        GenerateButton                  matlab.ui.control.Button
+        ElementsEditFieldLabel          matlab.ui.control.Label
+        Elements                        matlab.ui.control.NumericEditField
+        NodesEditField_2Label           matlab.ui.control.Label
+        Nodes                           matlab.ui.control.NumericEditField
+        MeshRefinementSliderLabel       matlab.ui.control.Label
+        MeshRefinementSlider            matlab.ui.control.Slider
+        UIAxes_2                        matlab.ui.control.UIAxes
+        Plot                            matlab.ui.control.Button
+        ColorbarButtonGroup             matlab.ui.container.ButtonGroup
+        Button_2                        matlab.ui.control.ToggleButton
+        Button_3                        matlab.ui.control.ToggleButton
+        ConductivitykEditFieldLabel     matlab.ui.control.Label
+        ConductivitykEditField          matlab.ui.control.NumericEditField
+        PreProcessLabel                 matlab.ui.control.Label
         TemperatureMagnitudeEditFieldLabel  matlab.ui.control.Label
-        TemperatureMagnitudeEditField  matlab.ui.control.NumericEditField
-        UIAxes_3                       matlab.ui.control.UIAxes
+        TemperatureMagnitudeEditField   matlab.ui.control.NumericEditField
+        Lamp                            matlab.ui.control.Lamp
+        UIAxes_3                        matlab.ui.control.UIAxes
+        PostProcessLabel                matlab.ui.control.Label
+        ProcessLabel                    matlab.ui.control.Label
+        DeformationTypeButtonGroup_2    matlab.ui.container.ButtonGroup
+        HorizontalButton                matlab.ui.control.ToggleButton
+        DiagonalButton                  matlab.ui.control.ToggleButton
+        VerticalButton                  matlab.ui.control.ToggleButton
+        Image                           matlab.ui.control.Image
+        Image_2                         matlab.ui.control.Image
+        Image_3                         matlab.ui.control.Image
+        DropDown                        matlab.ui.control.DropDown
+        ComputationTimesEditFieldLabel  matlab.ui.control.Label
+        ComputationTimesEditField       matlab.ui.control.NumericEditField
     end
 
  
@@ -141,32 +154,90 @@ classdef FEMGui_2 < matlab.apps.AppBase
             load('x.mat', 'x');
             load('y.mat', 'y');
             
+            
+            %initialize plotting variables
             NoN = size(NL, 1);
             NoE = size(EL, 1);
             NPE = size(EL, 2);
+            BC_flag = app.DeformationTypeButtonGroup_2.SelectedObject.Text;
+            T = app.TemperatureMagnitudeEditField.Value;
+            k = app.ConductivitykEditField.Value;
+            plotType = app.DropDown.Value;
             
-            for i = 1:NoE
-                nl = EL(i, 1:NPE);
-                for j = 1:NPE
-                    z(j, i) = 0;
-                    c(j, i) = x(j, i);
-                end
+            tic 
+            [NL, EL, ENL] = FEM(NL, EL, BC_flag, T, k);
+            
+%             
+%             for i = 1:NoE
+%                 nl = EL(i, 1:NPE);
+%                 for j = 1:NPE
+%                     z(j, i) = 0;
+%                     c(j, i) = x(j, i);
+%                 end
+%             end
+
+            [X_1, Y_1, T, flux_x, flux_y] = post_process(NL, EL, ENL);
+            switch plotType
+%                 case 'Temperature'
+%                     patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+%                     
+%                 case 'Flux X'
+%                     
+%                     patch(app.UIAxes_2, X_1,Y_1,flux_x);
+%                     
+%                 case 'Flux Y'
+%                     
+%                     patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+%                     
+
+                case 'Temperature'
+                    patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+                    colormap(app.UIAxes_2, 'jet');
+                    colorbar(app.UIAxes_2);
+                    xlabel(app.UIAxes_2, 'X Coordinates');
+                    ylabel(app.UIAxes_2, 'Y Coordinates');
+                    title(app.UIAxes_2, ['Temperature ']);
+                    %colorbar(parula(5))
+                case 'Flux X'
+                    
+                    patch(app.UIAxes_2, X_1,Y_1,flux_x);
+                    colormap(app.UIAxes_2, 'jet');
+                    colorbar(app.UIAxes_2);
+                    xlabel(app.UIAxes_2, 'X Coordinates');
+                    ylabel(app.UIAxes_2, 'Y Coordinates');
+                    title(app.UIAxes_2, ['Flux in X Direction']);
+                   
+                    
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                case 'Flux Y'
+                    
+                    patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+                    colormap(app.UIAxes_2, 'jet');
+                    colorbar(app.UIAxes_2);
+                    xlabel(app.UIAxes_2, 'X Coordinates');
+                    ylabel(app.UIAxes_2, 'Y Coordinates');
+                    title(app.UIAxes_2, ['Flux in Y Direction']);
+                   
             end
             
-            patch(app.UIAxes_2, x, y, z, c);
-            colormap(app.UIAxes_2, 'jet');
+            c_time=toc;
             
-            hold(app.UIAxes_2, 'on');
-            set(app.UIAxes_2, 'View', [0 90]);
-            
-            %to set limit on color maps
-
-            h_2 = colorbar(app.UIAxes_2);
-            t=get(h_2, 'Limits');
-            T = linspace(t(1), t(2), 5);
-            set(h_2, 'Ticks', T);
-            TL = arrayfun(@(x) sprintf('%.2f', x), T, 'un', 0);
-            set(h_2, 'TickLabels', TL);
+            %patch(app.UIAxes_2, x, y, z, c);
+%             
+%             colormap(app.UIAxes_2, 'jet');
+%             
+%             hold(app.UIAxes_2, 'on');
+%             set(app.UIAxes_2, 'View', [0 90]);
+%             
+%             %to set limit on color maps
+% 
+%             h_2 = colorbar(app.UIAxes_2);
+%             t=get(h_2, 'Limits');
+%             T1 = linspace(t(1), t(2), 5);
+%             set(h_2, 'Ticks', T1);
+%             TL = arrayfun(@(x) sprintf('%.2f', x), T1, 'un', 0);
+%             set(h_2, 'TickLabels', TL);
 
         end
 
@@ -186,6 +257,11 @@ classdef FEMGui_2 < matlab.apps.AppBase
             GenerateButtonPushed(app, event);
             PlotButtonPushed(app, event);
         end
+
+        % Selection changed function: DeformationTypeButtonGroup_2
+        function DeformationTypeButtonGroup_2SelectionChanged(app, event)
+            selectedButton = app.DeformationTypeButtonGroup_2.SelectedObject;
+        end
     end
 
     % Component initialization
@@ -196,87 +272,87 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 661 482];
+            app.UIFigure.Position = [100 100 864 635];
             app.UIFigure.Name = 'UI Figure';
 
             % Create aEditFieldLabel
             app.aEditFieldLabel = uilabel(app.UIFigure);
             app.aEditFieldLabel.HorizontalAlignment = 'right';
-            app.aEditFieldLabel.Position = [157 434 25 22];
+            app.aEditFieldLabel.Position = [157 587 25 22];
             app.aEditFieldLabel.Text = 'a';
 
             % Create a
             app.a = uieditfield(app.UIFigure, 'numeric');
-            app.a.Position = [197 434 36 22];
+            app.a.Position = [197 587 36 22];
             app.a.Value = 1;
 
             % Create bEditFieldLabel
             app.bEditFieldLabel = uilabel(app.UIFigure);
             app.bEditFieldLabel.HorizontalAlignment = 'right';
-            app.bEditFieldLabel.Position = [157 407 25 22];
+            app.bEditFieldLabel.Position = [157 560 25 22];
             app.bEditFieldLabel.Text = 'b';
 
             % Create b
             app.b = uieditfield(app.UIFigure, 'numeric');
-            app.b.Position = [197 407 36 22];
+            app.b.Position = [197 560 36 22];
             app.b.Value = 1;
 
             % Create cEditFieldLabel
             app.cEditFieldLabel = uilabel(app.UIFigure);
             app.cEditFieldLabel.HorizontalAlignment = 'right';
-            app.cEditFieldLabel.Position = [157 380 25 22];
+            app.cEditFieldLabel.Position = [157 533 25 22];
             app.cEditFieldLabel.Text = 'c';
 
             % Create c
             app.c = uieditfield(app.UIFigure, 'numeric');
-            app.c.Position = [197 380 36 22];
+            app.c.Position = [197 533 36 22];
             app.c.Value = 5;
 
             % Create dEditFieldLabel
             app.dEditFieldLabel = uilabel(app.UIFigure);
             app.dEditFieldLabel.HorizontalAlignment = 'right';
-            app.dEditFieldLabel.Position = [157 353 25 22];
+            app.dEditFieldLabel.Position = [157 506 25 22];
             app.dEditFieldLabel.Text = 'd';
 
             % Create d
             app.d = uieditfield(app.UIFigure, 'numeric');
-            app.d.Position = [197 353 36 22];
+            app.d.Position = [197 506 36 22];
             app.d.Value = 5;
 
             % Create ElementTypeDropDownLabel
             app.ElementTypeDropDownLabel = uilabel(app.UIFigure);
             app.ElementTypeDropDownLabel.HorizontalAlignment = 'right';
-            app.ElementTypeDropDownLabel.Position = [250 384 79 22];
+            app.ElementTypeDropDownLabel.Position = [271 548 79 22];
             app.ElementTypeDropDownLabel.Text = 'Element Type';
 
             % Create ElementType
             app.ElementType = uidropdown(app.UIFigure);
             app.ElementType.Items = {'2DTR3N', '2DQU4N'};
             app.ElementType.ValueChangedFcn = createCallbackFcn(app, @ElementTypeValueChanged, true);
-            app.ElementType.Position = [250 355 82 22];
+            app.ElementType.Position = [271 519 82 22];
             app.ElementType.Value = '2DTR3N';
 
             % Create MeshCriteriaLabel
             app.MeshCriteriaLabel = uilabel(app.UIFigure);
             app.MeshCriteriaLabel.FontWeight = 'bold';
-            app.MeshCriteriaLabel.Position = [50 445 81 22];
+            app.MeshCriteriaLabel.Position = [50 598 81 22];
             app.MeshCriteriaLabel.Text = 'Mesh Criteria';
 
             % Create Button
             app.Button = uibutton(app.UIFigure, 'push');
             app.Button.Icon = 'circle.png';
-            app.Button.Position = [48 351 104 87];
+            app.Button.Position = [48 504 104 87];
             app.Button.Text = '';
 
             % Create eEditFieldLabel
             app.eEditFieldLabel = uilabel(app.UIFigure);
             app.eEditFieldLabel.HorizontalAlignment = 'right';
-            app.eEditFieldLabel.Position = [157 326 25 22];
+            app.eEditFieldLabel.Position = [157 479 25 22];
             app.eEditFieldLabel.Text = 'e';
 
             % Create e
             app.e = uieditfield(app.UIFigure, 'numeric');
-            app.e.Position = [197 326 36 22];
+            app.e.Position = [197 479 36 22];
             app.e.Value = 0.2;
 
             % Create UIAxes
@@ -290,73 +366,74 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.UIAxes.YColor = 'none';
             app.UIAxes.YTick = [];
             app.UIAxes.ZColor = 'none';
-            app.UIAxes.Position = [344 306 150 150];
+            app.UIAxes.Position = [497 449 150 150];
 
             % Create GenerateButton
             app.GenerateButton = uibutton(app.UIFigure, 'push');
             app.GenerateButton.ButtonPushedFcn = createCallbackFcn(app, @GenerateButtonPushed, true);
-            app.GenerateButton.Position = [514 383 100 22];
+            app.GenerateButton.Position = [682 577 100 22];
             app.GenerateButton.Text = 'Generate';
 
             % Create ElementsEditFieldLabel
             app.ElementsEditFieldLabel = uilabel(app.UIFigure);
             app.ElementsEditFieldLabel.HorizontalAlignment = 'right';
-            app.ElementsEditFieldLabel.Position = [514 445 62 22];
+            app.ElementsEditFieldLabel.Position = [682 477 62 22];
             app.ElementsEditFieldLabel.Text = '#Elements';
 
             % Create Elements
             app.Elements = uieditfield(app.UIFigure, 'numeric');
             app.Elements.Editable = 'off';
-            app.Elements.Position = [514 423 100 23];
+            app.Elements.Position = [682 455 100 23];
 
             % Create NodesEditField_2Label
             app.NodesEditField_2Label = uilabel(app.UIFigure);
             app.NodesEditField_2Label.HorizontalAlignment = 'right';
-            app.NodesEditField_2Label.Position = [514 343 47 22];
+            app.NodesEditField_2Label.Position = [682 539 47 22];
             app.NodesEditField_2Label.Text = '#Nodes';
 
             % Create Nodes
             app.Nodes = uieditfield(app.UIFigure, 'numeric');
             app.Nodes.Editable = 'off';
-            app.Nodes.Position = [514 323 100 21];
+            app.Nodes.Position = [682 519 100 21];
 
             % Create MeshRefinementSliderLabel
             app.MeshRefinementSliderLabel = uilabel(app.UIFigure);
             app.MeshRefinementSliderLabel.HorizontalAlignment = 'right';
-            app.MeshRefinementSliderLabel.Position = [48 293 100 22];
+            app.MeshRefinementSliderLabel.Position = [398 581 100 22];
             app.MeshRefinementSliderLabel.Text = 'Mesh Refinement';
 
             % Create MeshRefinementSlider
             app.MeshRefinementSlider = uislider(app.UIFigure);
             app.MeshRefinementSlider.Limits = [0 20];
+            app.MeshRefinementSlider.Orientation = 'vertical';
             app.MeshRefinementSlider.ValueChangedFcn = createCallbackFcn(app, @MeshRefinementSliderValueChanged, true);
-            app.MeshRefinementSlider.Position = [169 302 150 3];
+            app.MeshRefinementSlider.Position = [461 462 3 118];
 
             % Create UIAxes_2
             app.UIAxes_2 = uiaxes(app.UIFigure);
-            title(app.UIAxes_2, '')
-            xlabel(app.UIAxes_2, '')
-            ylabel(app.UIAxes_2, '')
+            title(app.UIAxes_2, '', 'Interpreter', 'latex')
+            xlabel(app.UIAxes_2, '', 'Interpreter', 'latex')
+            ylabel(app.UIAxes_2, '', 'Interpreter', 'latex')
             app.UIAxes_2.GridColor = [0 0 0];
             app.UIAxes_2.XColor = 'none';
             app.UIAxes_2.XTick = [];
             app.UIAxes_2.YColor = 'none';
             app.UIAxes_2.YTick = [];
             app.UIAxes_2.ZColor = 'none';
-            app.UIAxes_2.Position = [428 23 200 150];
+            app.UIAxes_2.Position = [539 29 284 230];
 
             % Create Plot
             app.Plot = uibutton(app.UIFigure, 'push');
             app.Plot.ButtonPushedFcn = createCallbackFcn(app, @PlotButtonPushed, true);
-            app.Plot.Position = [575 222 72 22];
-            app.Plot.Text = 'Plot';
+            app.Plot.Position = [718 364 72 22];
+            app.Plot.Text = 'Run';
 
             % Create ColorbarButtonGroup
             app.ColorbarButtonGroup = uibuttongroup(app.UIFigure);
             app.ColorbarButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ColorbarButtonGroupSelectionChanged, true);
             app.ColorbarButtonGroup.TitlePosition = 'centertop';
             app.ColorbarButtonGroup.Title = 'Colorbar';
-            app.ColorbarButtonGroup.Position = [271 67 122.992713928223 105.997970581055];
+            app.ColorbarButtonGroup.Position = [372 134 122.992713928223 105.997970581055];
 
             % Create Button_2
             app.Button_2 = uitogglebutton(app.ColorbarButtonGroup);
@@ -372,44 +449,120 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.Button_3.Text = '';
             app.Button_3.Position = [83.5 13 32 62];
 
-            % Create MaterialPropertieskEditFieldLabel
-            app.MaterialPropertieskEditFieldLabel = uilabel(app.UIFigure);
-            app.MaterialPropertieskEditFieldLabel.HorizontalAlignment = 'right';
-            app.MaterialPropertieskEditFieldLabel.Position = [30 233 123 22];
-            app.MaterialPropertieskEditFieldLabel.Text = 'Material Properties (k)';
+            % Create ConductivitykEditFieldLabel
+            app.ConductivitykEditFieldLabel = uilabel(app.UIFigure);
+            app.ConductivitykEditFieldLabel.HorizontalAlignment = 'right';
+            app.ConductivitykEditFieldLabel.Position = [53 375 84 22];
+            app.ConductivitykEditFieldLabel.Text = 'Conductivity (k)';
 
-            % Create MaterialPropertieskEditField
-            app.MaterialPropertieskEditField = uieditfield(app.UIFigure, 'numeric');
-            app.MaterialPropertieskEditField.Position = [41 212 100 22];
+            % Create ConductivitykEditField
+            app.ConductivitykEditField = uieditfield(app.UIFigure, 'numeric');
+            app.ConductivitykEditField.Position = [53 354 76 22];
+            app.ConductivitykEditField.Value = 100;
 
             % Create PreProcessLabel
             app.PreProcessLabel = uilabel(app.UIFigure);
+            app.PreProcessLabel.FontSize = 14;
             app.PreProcessLabel.FontWeight = 'bold';
-            app.PreProcessLabel.Position = [261 461 75 22];
+            app.PreProcessLabel.Position = [416 608 119 22];
             app.PreProcessLabel.Text = 'Pre-Process';
 
             % Create TemperatureMagnitudeEditFieldLabel
             app.TemperatureMagnitudeEditFieldLabel = uilabel(app.UIFigure);
             app.TemperatureMagnitudeEditFieldLabel.HorizontalAlignment = 'right';
-            app.TemperatureMagnitudeEditFieldLabel.Position = [412 233 132 22];
+            app.TemperatureMagnitudeEditFieldLabel.Position = [53 323 132 22];
             app.TemperatureMagnitudeEditFieldLabel.Text = 'Temperature Magnitude';
 
             % Create TemperatureMagnitudeEditField
             app.TemperatureMagnitudeEditField = uieditfield(app.UIFigure, 'numeric');
-            app.TemperatureMagnitudeEditField.Position = [428 212 100 22];
+            app.TemperatureMagnitudeEditField.Position = [53 302 76 22];
+            app.TemperatureMagnitudeEditField.Value = 100;
+
+            % Create Lamp
+            app.Lamp = uilamp(app.UIFigure);
+            app.Lamp.Position = [743 334 20 20];
 
             % Create UIAxes_3
             app.UIAxes_3 = uiaxes(app.UIFigure);
-            title(app.UIAxes_3, '')
-            xlabel(app.UIAxes_3, '')
-            ylabel(app.UIAxes_3, '')
+            title(app.UIAxes_3, '', 'Interpreter', 'latex')
+            xlabel(app.UIAxes_3, '', 'Interpreter', 'latex')
+            ylabel(app.UIAxes_3, '', 'Interpreter', 'latex')
             app.UIAxes_3.GridColor = [0 0 0];
             app.UIAxes_3.XColor = 'none';
             app.UIAxes_3.XTick = [];
             app.UIAxes_3.YColor = 'none';
             app.UIAxes_3.YTick = [];
             app.UIAxes_3.ZColor = 'none';
-            app.UIAxes_3.Position = [30 23 200 150];
+            app.UIAxes_3.Position = [28 29 284 230];
+
+            % Create PostProcessLabel
+            app.PostProcessLabel = uilabel(app.UIFigure);
+            app.PostProcessLabel.FontSize = 14;
+            app.PostProcessLabel.FontWeight = 'bold';
+            app.PostProcessLabel.Position = [403 250 119 22];
+            app.PostProcessLabel.Text = 'Post-Process';
+
+            % Create ProcessLabel
+            app.ProcessLabel = uilabel(app.UIFigure);
+            app.ProcessLabel.FontSize = 14;
+            app.ProcessLabel.FontWeight = 'bold';
+            app.ProcessLabel.Position = [421 407 119 22];
+            app.ProcessLabel.Text = 'Process';
+
+            % Create DeformationTypeButtonGroup_2
+            app.DeformationTypeButtonGroup_2 = uibuttongroup(app.UIFigure);
+            app.DeformationTypeButtonGroup_2.SelectionChangedFcn = createCallbackFcn(app, @DeformationTypeButtonGroup_2SelectionChanged, true);
+            app.DeformationTypeButtonGroup_2.TitlePosition = 'centertop';
+            app.DeformationTypeButtonGroup_2.Title = 'Deformation Type';
+            app.DeformationTypeButtonGroup_2.Position = [246 279 411 118];
+
+            % Create HorizontalButton
+            app.HorizontalButton = uitogglebutton(app.DeformationTypeButtonGroup_2);
+            app.HorizontalButton.Text = 'Horizontal';
+            app.HorizontalButton.Position = [11 74 100 22];
+            app.HorizontalButton.Value = true;
+
+            % Create DiagonalButton
+            app.DiagonalButton = uitogglebutton(app.DeformationTypeButtonGroup_2);
+            app.DiagonalButton.Text = 'Diagonal';
+            app.DiagonalButton.Position = [156 74 100 22];
+
+            % Create VerticalButton
+            app.VerticalButton = uitogglebutton(app.DeformationTypeButtonGroup_2);
+            app.VerticalButton.Text = 'Vertical';
+            app.VerticalButton.Position = [301 74 100 22];
+
+            % Create Image
+            app.Image = uiimage(app.DeformationTypeButtonGroup_2);
+            app.Image.Position = [17 13 92 54];
+            app.Image.ImageSource = 'Horizontal.PNG';
+
+            % Create Image_2
+            app.Image_2 = uiimage(app.DeformationTypeButtonGroup_2);
+            app.Image_2.Position = [160 12 92 54];
+            app.Image_2.ImageSource = 'Diagonal.PNG';
+
+            % Create Image_3
+            app.Image_3 = uiimage(app.DeformationTypeButtonGroup_2);
+            app.Image_3.Position = [305 12 92 54];
+            app.Image_3.ImageSource = 'Vertical.PNG';
+
+            % Create DropDown
+            app.DropDown = uidropdown(app.UIFigure);
+            app.DropDown.Items = {'Temperature', ' Flux X', ' Flux Y'};
+            app.DropDown.Position = [384 93 100 22];
+            app.DropDown.Value = 'Temperature';
+
+            % Create ComputationTimesEditFieldLabel
+            app.ComputationTimesEditFieldLabel = uilabel(app.UIFigure);
+            app.ComputationTimesEditFieldLabel.HorizontalAlignment = 'center';
+            app.ComputationTimesEditFieldLabel.Position = [372 57 133 22];
+            app.ComputationTimesEditFieldLabel.Text = 'Computation Time (s)';
+
+            % Create ComputationTimesEditField
+            app.ComputationTimesEditField = uieditfield(app.UIFigure, 'numeric');
+            app.ComputationTimesEditField.Editable = 'off';
+            app.ComputationTimesEditField.Position = [384 29 100 22];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
