@@ -49,12 +49,56 @@ classdef FEMGui_2 < matlab.apps.AppBase
         DropDown                        matlab.ui.control.DropDown
         ComputationTimesEditFieldLabel  matlab.ui.control.Label
         ComputationTimesEditField       matlab.ui.control.NumericEditField
-        TestingEditFieldLabel           matlab.ui.control.Label
-        TestingEditField                matlab.ui.control.EditField
+        ResetButton                     matlab.ui.control.Button
+        ResetButton_2                   matlab.ui.control.Button
+        ResetButton_3                   matlab.ui.control.Button
+        EdgeDisplaySwitchLabel          matlab.ui.control.Label
+        TestEditFieldLabel              matlab.ui.control.Label
+        TestEditField                   matlab.ui.control.NumericEditField
+        EdgeDisplaySwitch               matlab.ui.control.Switch
     end
 
+    
+    properties (Access = public)
+        didPlotHappen = 0; % Description
+        plotType = 'Horizontal';
+    end
+    
+   
  
  
+    
+    methods (Access = public)
+        
+        function results = func(app)
+            switch app.plotType
+                case 'Temperature'
+                    patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+                    colormap(app.UIAxes_2, 'jet');
+                    colorbar(app.UIAxes_2);
+                    xlabel(app.UIAxes_2, 'X Coordinates');
+                    ylabel(app.UIAxes_2, 'Y Coordinates');
+                    title(app.UIAxes_2, ['Temperature ']);
+                    
+                case 'Flux X'
+                    patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
+                    colormap(app.UIAxes_2, 'jet');
+                    colorbar(app.UIAxes_2);
+                    xlabel(app.UIAxes_2, 'X Coordinates');
+                    ylabel(app.UIAxes_2, 'Y Coordinates');
+                    title(app.UIAxes_2, ['Flux in X Direction']);
+                    
+                case 'Flux Y'
+                    patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+                    colormap(app.UIAxes_2, 'jet');
+                    colorbar(app.UIAxes_2);
+                    xlabel(app.UIAxes_2, 'X Coordinates');
+                    ylabel(app.UIAxes_2, 'Y Coordinates');
+                    title(app.UIAxes_2, ['Flux in Y Direction']);
+            end
+            
+        end
+    end
     
 
     % Callbacks that handle component events
@@ -113,7 +157,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             
             %Clear UIAxes
             app.UIAxes.cla;
-            app.UIAxes_2.cla;
+            %app.UIAxes_2.cla;
             
             [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(app.c.Value), round(app.d.Value), app.e.Value, app.ElementType.Value);
             
@@ -136,25 +180,50 @@ classdef FEMGui_2 < matlab.apps.AppBase
             
             app.Elements.Value = NoE;
             app.Nodes.Value = NoN;
-            
-            
-            %%% This part does the mesh for the coloured graph
-            save('EL.mat', 'EL');
-            save('NL.mat', 'NL');
-            save('x.mat', 'x');
-            save('y.mat', 'y');
-            
-            PlotButtonPushed(app, event);
+% %             
+%             
+%             %%% This part does the mesh for the coloured graph
+%             save('EL.mat', 'EL');
+%             save('NL.mat', 'NL');
+%             save('x.mat', 'x');
+%             save('y.mat', 'y');
+%             
+%             PlotButtonPushed(app, event);
 
         end
 
         % Button pushed function: Plot
         function PlotButtonPushed(app, event)
-    
-            load('EL.mat', 'EL');
-            load('NL.mat', 'NL');
-            load('x.mat', 'x');
-            load('y.mat', 'y');
+            app.Lamp.Color = [0 1 0];
+            
+            app.didPlotHappen = 1;
+%             load('EL.mat', 'EL');
+%             load('NL.mat', 'NL');
+%             load('x.mat', 'x');
+%             load('y.mat', 'y');
+%           
+            [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(app.c.Value), round(app.d.Value), app.e.Value, app.ElementType.Value);
+            
+              
+            NoN = size(NL, 1);
+            NoE = size(EL, 1);
+            NPE = size(EL, 2);
+            
+            for i = 1:NoE
+                nl = EL(i, 1:NPE);
+                for j = 1:NPE
+                    x(j,i) = NL(nl(j), 1);
+                    y(j,i) = NL(nl(j), 2);
+                end
+            end
+            
+            z = zeros(size(x,1), size(x,2));
+            
+            patch(app.UIAxes, x, y, z, 'FaceColor', 'none');
+            
+            app.Elements.Value = NoE;
+            app.Nodes.Value = NoN;
+
             
             app.UIAxes_2.cla;
             
@@ -165,23 +234,23 @@ classdef FEMGui_2 < matlab.apps.AppBase
             BC_flag = app.DeformationTypeButtonGroup_2.SelectedObject.Text;
             T = app.TemperatureMagnitudeEditField.Value;
             k = app.ConductivitykEditField.Value;
-            plotType = app.DropDown.Value;
-            app.TestingEditField.Value = plotType;
+            app.plotType = app.DropDown.Value;
             
             tic 
             [NL, EL, ENL] = FEM(NL, EL, BC_flag, T, k);
             
-%             
-%             for i = 1:NoE
-%                 nl = EL(i, 1:NPE);
-%                 for j = 1:NPE
-%                     z(j, i) = 0;
-%                     c(j, i) = x(j, i);
-%                 end
-%             end
-
             [X_1, Y_1, T, flux_x, flux_y] = post_process(NL, EL, ENL);
-            switch plotType
+            
+            save('NL.mat', 'NL');
+            save('EL.mat', 'EL');
+            save('ENL.mat', 'ENL');
+            save('X_1.mat', 'X_1');
+            save('Y_1.mat', 'Y_1');
+            save('T.mat', 'T');
+            save('flux_x.mat', 'flux_x');
+            save('flux_y.mat', 'flux_y');
+            
+            switch app.plotType
 %                 case 'Temperature'
 %                     patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
 %                     
@@ -204,8 +273,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
                     %colorbar(parula(5))
                 case 'Flux X'
                     
-                    app.TestingEditField.Value = 'Flux X is running';
-                    
                     patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
                     colormap(app.UIAxes_2, 'jet');
                     colorbar(app.UIAxes_2);
@@ -218,8 +285,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 case 'Flux Y'
                     
-                    app.TestingEditField.Value = 'Flux Y is running';
-                    
                     patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
                     colormap(app.UIAxes_2, 'jet');
                     colorbar(app.UIAxes_2);
@@ -229,7 +294,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
                    
             end
             
-            c_time=toc;
+            app.ComputationTimesEditField.Value=toc;
+            app.Lamp.Color = [1 0 0];
             
             %patch(app.UIAxes_2, x, y, z, c);
 %             
@@ -246,7 +312,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
 %             set(h_2, 'Ticks', T1);
 %             TL = arrayfun(@(x) sprintf('%.2f', x), T1, 'un', 0);
 %             set(h_2, 'TickLabels', TL);
-
+            
         end
 
         % Selection changed function: ColorbarButtonGroup
@@ -262,19 +328,176 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
         % Value changed function: ElementType
         function ElementTypeValueChanged(app, event)
-            GenerateButtonPushed(app, event);
-            PlotButtonPushed(app, event);
+%             GenerateButtonPushed(app, event);
+%             PlotButtonPushed(app, event);
         end
 
         % Selection changed function: DeformationTypeButtonGroup_2
         function DeformationTypeButtonGroup_2SelectionChanged(app, event)
-            selectedButton = app.DeformationTypeButtonGroup_2.SelectedObject;
+            selectedButton = app.DeformationTypeButtonGroup_2.SelectedObject.Text;
+            switch selectedButton
+                case 'Horizontal'
+                    app.Image.Enable = 'on';
+                    app.Image_2.Enable = 'off';
+                    app.Image_3.Enable = 'off';
+                case 'Diagonal'
+                    app.Image.Enable = 'off';
+                    app.Image_2.Enable = 'on';
+                    app.Image_3.Enable = 'off';
+                case 'Vertical'
+                    app.Image.Enable = 'off';
+                    app.Image_2.Enable = 'off';
+                    app.Image_3.Enable = 'on';
+            end
         end
 
         % Value changed function: DropDown
         function DropDownValueChanged(app, event)
-            plotType = app.DropDown.Value;
+            app.plotType = app.DropDown.Value;
+        
+            %This prevents plot from updating if no values are calculated
+            if (app.didPlotHappen) %refer to beginning plotting function
+                app.UIAxes_2.cla;
+                load('X_1.mat', 'X_1');
+                load('Y_1.mat', 'Y_1');
+                load('T.mat', 'T');
+                load('flux_x.mat', 'flux_x');
+                load('flux_y.mat', 'flux_y');
+                
+                switch app.plotType
+                    
+                    case 'Temperature'
+                        patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Temperature ']);
+                        
+                    case 'Flux X'
+                        
+                        patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Flux in X Direction']);
+                        
+                    case 'Flux Y'
+                        
+                        patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Flux in Y Direction']);
+                        
+                end
+            end
+        end
+
+        % Button pushed function: ResetButton
+        function ResetButtonPushed(app, event)
+            app.UIAxes.cla;
+        end
+
+        % Button pushed function: ResetButton_2
+        function ResetButton_2Pushed(app, event)
+            app.UIAxes_3.cla;
+        end
+
+        % Button pushed function: ResetButton_3
+        function ResetButton_3Pushed(app, event)
+            app.UIAxes_2.cla;
+        end
+
+        % Callback function
+        function TestButtonPushed(app, event)
+            app.Lamp.Color = [0 1 0];
+        end
+
+        % Value changed function: EdgeDisplaySwitch
+        function EdgeDisplaySwitchValueChanged(app, event)
+            value = app.EdgeDisplaySwitch.Text;
+            app.TestEditField.Value = value;
             
+            if(app.didPlotHappen)
+                if (value == "On") %refer to beginning plotting function
+                    app.UIAxes_2.cla;
+                    load('X_1.mat', 'X_1');
+                    load('Y_1.mat', 'Y_1');
+                    load('T.mat', 'T');
+                    load('flux_x.mat', 'flux_x');
+                    load('flux_y.mat', 'flux_y');
+                    
+                    switch app.plotType
+                        
+                        case 'Temperature'
+                            patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Temperature ']);
+                            
+                        case 'Flux X'
+                            
+                            patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in X Direction']);
+                            
+                        case 'Flux Y'
+                            
+                            patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in Y Direction']);
+                            
+                    end
+                elseif (value == "Off")
+                    app.UIAxes_2.cla;
+                    load('X_1.mat', 'X_1');
+                    load('Y_1.mat', 'Y_1');
+                    load('T.mat', 'T');
+                    load('flux_x.mat', 'flux_x');
+                    load('flux_y.mat', 'flux_y');
+                    
+                    switch plotType
+                        
+                        case 'Temperature'
+                            patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp', 'EdgeColor', 'none');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Temperature ']);
+                            
+                        case 'Flux X'
+                            
+                            patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp', 'EdgeColor', 'none');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in X Direction']);
+                            
+                        case 'Flux Y'
+                            
+                            patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp', 'EdgeColor', 'none');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in Y Direction']);
+                            
+                    end
+                end
+            end
         end
     end
 
@@ -371,15 +594,16 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create UIAxes
             app.UIAxes = uiaxes(app.UIFigure);
-            title(app.UIAxes, '')
-            xlabel(app.UIAxes, '')
-            ylabel(app.UIAxes, '')
+            title(app.UIAxes, '', 'Interpreter', 'latex')
+            xlabel(app.UIAxes, '', 'Interpreter', 'latex')
+            ylabel(app.UIAxes, '', 'Interpreter', 'latex')
             app.UIAxes.GridColor = [0 0 0];
             app.UIAxes.XColor = 'none';
             app.UIAxes.XTick = [];
             app.UIAxes.YColor = 'none';
             app.UIAxes.YTick = [];
             app.UIAxes.ZColor = 'none';
+            app.UIAxes.Visible = 'off';
             app.UIAxes.Position = [497 449 150 150];
 
             % Create GenerateButton
@@ -418,7 +642,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create MeshRefinementSlider
             app.MeshRefinementSlider = uislider(app.UIFigure);
-            app.MeshRefinementSlider.Limits = [0 20];
+            app.MeshRefinementSlider.Limits = [0 50];
             app.MeshRefinementSlider.Orientation = 'vertical';
             app.MeshRefinementSlider.ValueChangedFcn = createCallbackFcn(app, @MeshRefinementSliderValueChanged, true);
             app.MeshRefinementSlider.Position = [461 462 3 118];
@@ -434,6 +658,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.UIAxes_2.YColor = 'none';
             app.UIAxes_2.YTick = [];
             app.UIAxes_2.ZColor = 'none';
+            app.UIAxes_2.Visible = 'off';
             app.UIAxes_2.Position = [539 29 284 230];
 
             % Create Plot
@@ -447,7 +672,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.ColorbarButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ColorbarButtonGroupSelectionChanged, true);
             app.ColorbarButtonGroup.TitlePosition = 'centertop';
             app.ColorbarButtonGroup.Title = 'Colorbar';
-            app.ColorbarButtonGroup.Position = [372 134 122.992713928223 105.997970581055];
+            app.ColorbarButtonGroup.Position = [378 145 122.992713928223 105.997970581055];
 
             % Create Button_2
             app.Button_2 = uitogglebutton(app.ColorbarButtonGroup);
@@ -495,6 +720,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             % Create Lamp
             app.Lamp = uilamp(app.UIFigure);
             app.Lamp.Position = [743 334 20 20];
+            app.Lamp.Color = [1 0 0];
 
             % Create UIAxes_3
             app.UIAxes_3 = uiaxes(app.UIFigure);
@@ -507,6 +733,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.UIAxes_3.YColor = 'none';
             app.UIAxes_3.YTick = [];
             app.UIAxes_3.ZColor = 'none';
+            app.UIAxes_3.Visible = 'off';
             app.UIAxes_3.Position = [28 29 284 230];
 
             % Create PostProcessLabel
@@ -553,11 +780,13 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create Image_2
             app.Image_2 = uiimage(app.DeformationTypeButtonGroup_2);
+            app.Image_2.Enable = 'off';
             app.Image_2.Position = [160 12 92 54];
             app.Image_2.ImageSource = 'Diagonal.PNG';
 
             % Create Image_3
             app.Image_3 = uiimage(app.DeformationTypeButtonGroup_2);
+            app.Image_3.Enable = 'off';
             app.Image_3.Position = [305 12 92 54];
             app.Image_3.ImageSource = 'Vertical.PNG';
 
@@ -565,29 +794,58 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.DropDown = uidropdown(app.UIFigure);
             app.DropDown.Items = {'Temperature', 'Flux X', 'Flux Y'};
             app.DropDown.ValueChangedFcn = createCallbackFcn(app, @DropDownValueChanged, true);
-            app.DropDown.Position = [384 93 100 22];
+            app.DropDown.Position = [386 113 100 22];
             app.DropDown.Value = 'Temperature';
 
             % Create ComputationTimesEditFieldLabel
             app.ComputationTimesEditFieldLabel = uilabel(app.UIFigure);
             app.ComputationTimesEditFieldLabel.HorizontalAlignment = 'center';
-            app.ComputationTimesEditFieldLabel.Position = [372 57 133 22];
+            app.ComputationTimesEditFieldLabel.Position = [718 302 117 22];
             app.ComputationTimesEditFieldLabel.Text = 'Computation Time (s)';
 
             % Create ComputationTimesEditField
             app.ComputationTimesEditField = uieditfield(app.UIFigure, 'numeric');
             app.ComputationTimesEditField.Editable = 'off';
-            app.ComputationTimesEditField.Position = [384 29 100 22];
+            app.ComputationTimesEditField.Position = [741 274 62 22];
 
-            % Create TestingEditFieldLabel
-            app.TestingEditFieldLabel = uilabel(app.UIFigure);
-            app.TestingEditFieldLabel.HorizontalAlignment = 'right';
-            app.TestingEditFieldLabel.Position = [45 428 44 22];
-            app.TestingEditFieldLabel.Text = 'Testing';
+            % Create ResetButton
+            app.ResetButton = uibutton(app.UIFigure, 'push');
+            app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
+            app.ResetButton.Position = [521 428 100 22];
+            app.ResetButton.Text = 'Reset';
 
-            % Create TestingEditField
-            app.TestingEditField = uieditfield(app.UIFigure, 'text');
-            app.TestingEditField.Position = [104 428 100 22];
+            % Create ResetButton_2
+            app.ResetButton_2 = uibutton(app.UIFigure, 'push');
+            app.ResetButton_2.ButtonPushedFcn = createCallbackFcn(app, @ResetButton_2Pushed, true);
+            app.ResetButton_2.Position = [104 8 100 22];
+            app.ResetButton_2.Text = 'Reset';
+
+            % Create ResetButton_3
+            app.ResetButton_3 = uibutton(app.UIFigure, 'push');
+            app.ResetButton_3.ButtonPushedFcn = createCallbackFcn(app, @ResetButton_3Pushed, true);
+            app.ResetButton_3.Position = [631 8 100 22];
+            app.ResetButton_3.Text = 'Reset';
+
+            % Create EdgeDisplaySwitchLabel
+            app.EdgeDisplaySwitchLabel = uilabel(app.UIFigure);
+            app.EdgeDisplaySwitchLabel.HorizontalAlignment = 'center';
+            app.EdgeDisplaySwitchLabel.Position = [402.5 29 76 22];
+            app.EdgeDisplaySwitchLabel.Text = 'Edge Display';
+
+            % Create EdgeDisplaySwitch
+            app.EdgeDisplaySwitch = uiswitch(app.UIFigure, 'slider');
+            app.EdgeDisplaySwitch.ValueChangedFcn = createCallbackFcn(app, @EdgeDisplaySwitchValueChanged, true);
+            app.EdgeDisplaySwitch.Position = [417 66 45 20];
+
+            % Create TestEditFieldLabel
+            app.TestEditFieldLabel = uilabel(app.UIFigure);
+            app.TestEditFieldLabel.HorizontalAlignment = 'right';
+            app.TestEditFieldLabel.Position = [75 434 28 22];
+            app.TestEditFieldLabel.Text = 'Test';
+
+            % Create TestEditField
+            app.TestEditField = uieditfield(app.UIFigure, 'numeric');
+            app.TestEditField.Position = [118 434 100 22];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
