@@ -53,52 +53,16 @@ classdef FEMGui_2 < matlab.apps.AppBase
         ResetButton_2                   matlab.ui.control.Button
         ResetButton_3                   matlab.ui.control.Button
         EdgeDisplaySwitchLabel          matlab.ui.control.Label
-        TestEditFieldLabel              matlab.ui.control.Label
-        TestEditField                   matlab.ui.control.NumericEditField
-        EdgeDisplaySwitch               matlab.ui.control.Switch
+        Switch                          matlab.ui.control.Switch
     end
 
     
     properties (Access = public)
         didPlotHappen = 0; % Description
         plotType = 'Horizontal';
+        edgeSwitch = 0;
     end
     
-   
- 
- 
-    
-    methods (Access = public)
-        
-        function results = func(app)
-            switch app.plotType
-                case 'Temperature'
-                    patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
-                    colormap(app.UIAxes_2, 'jet');
-                    colorbar(app.UIAxes_2);
-                    xlabel(app.UIAxes_2, 'X Coordinates');
-                    ylabel(app.UIAxes_2, 'Y Coordinates');
-                    title(app.UIAxes_2, ['Temperature ']);
-                    
-                case 'Flux X'
-                    patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
-                    colormap(app.UIAxes_2, 'jet');
-                    colorbar(app.UIAxes_2);
-                    xlabel(app.UIAxes_2, 'X Coordinates');
-                    ylabel(app.UIAxes_2, 'Y Coordinates');
-                    title(app.UIAxes_2, ['Flux in X Direction']);
-                    
-                case 'Flux Y'
-                    patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
-                    colormap(app.UIAxes_2, 'jet');
-                    colorbar(app.UIAxes_2);
-                    xlabel(app.UIAxes_2, 'X Coordinates');
-                    ylabel(app.UIAxes_2, 'Y Coordinates');
-                    title(app.UIAxes_2, ['Flux in Y Direction']);
-            end
-            
-        end
-    end
     
 
     % Callbacks that handle component events
@@ -250,50 +214,61 @@ classdef FEMGui_2 < matlab.apps.AppBase
             save('flux_x.mat', 'flux_x');
             save('flux_y.mat', 'flux_y');
             
-            switch app.plotType
-%                 case 'Temperature'
-%                     patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
-%                     
-%                 case 'Flux X'
-%                     
-%                     patch(app.UIAxes_2, X_1,Y_1,flux_x);
-%                     
-%                 case 'Flux Y'
-%                     
-%                     patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
-%                     
-
-                case 'Temperature'
-                    patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
-                    colormap(app.UIAxes_2, 'jet');
-                    colorbar(app.UIAxes_2);
-                    xlabel(app.UIAxes_2, 'X Coordinates');
-                    ylabel(app.UIAxes_2, 'Y Coordinates');
-                    title(app.UIAxes_2, ['Temperature ']);
-                    %colorbar(parula(5))
-                case 'Flux X'
-                    
-                    patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
-                    colormap(app.UIAxes_2, 'jet');
-                    colorbar(app.UIAxes_2);
-                    xlabel(app.UIAxes_2, 'X Coordinates');
-                    ylabel(app.UIAxes_2, 'Y Coordinates');
-                    title(app.UIAxes_2, ['Flux in X Direction']);
-                   
-                    
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                case 'Flux Y'
-                    
-                    patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
-                    colormap(app.UIAxes_2, 'jet');
-                    colorbar(app.UIAxes_2);
-                    xlabel(app.UIAxes_2, 'X Coordinates');
-                    ylabel(app.UIAxes_2, 'Y Coordinates');
-                    title(app.UIAxes_2, ['Flux in Y Direction']);
-                   
-            end
             
+            if(app.Switch.Value == '1')
+                switch app.plotType
+                    case 'Temperature'
+                        patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Temperature ']);
+                        
+                    case 'Flux X'
+                        patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Flux in X Direction']);
+                        
+                    case 'Flux Y'
+                        patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Flux in Y Direction']);
+                end
+            elseif(app.Switch.Value == '0')
+                switch app.plotType
+                    case 'Temperature'
+                        patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp', 'EdgeColor', 'none');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Temperature ']);
+                        
+                    case 'Flux X'
+                        patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp', 'EdgeColor', 'none');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Flux in X Direction']);
+                        
+                    case 'Flux Y'
+                        patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp', 'EdgeColor', 'none');
+                        colormap(app.UIAxes_2, 'jet');
+                        colorbar(app.UIAxes_2);
+                        xlabel(app.UIAxes_2, 'X Coordinates');
+                        ylabel(app.UIAxes_2, 'Y Coordinates');
+                        title(app.UIAxes_2, ['Flux in Y Direction']);
+                end
+            end
+%             
             app.ComputationTimesEditField.Value=toc;
             app.Lamp.Color = [1 0 0];
             
@@ -354,7 +329,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
         % Value changed function: DropDown
         function DropDownValueChanged(app, event)
             app.plotType = app.DropDown.Value;
-        
+            
             %This prevents plot from updating if no values are calculated
             if (app.didPlotHappen) %refer to beginning plotting function
                 app.UIAxes_2.cla;
@@ -364,34 +339,58 @@ classdef FEMGui_2 < matlab.apps.AppBase
                 load('flux_x.mat', 'flux_x');
                 load('flux_y.mat', 'flux_y');
                 
-                switch app.plotType
-                    
-                    case 'Temperature'
-                        patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
-                        colormap(app.UIAxes_2, 'jet');
-                        colorbar(app.UIAxes_2);
-                        xlabel(app.UIAxes_2, 'X Coordinates');
-                        ylabel(app.UIAxes_2, 'Y Coordinates');
-                        title(app.UIAxes_2, ['Temperature ']);
-                        
-                    case 'Flux X'
-                        
-                        patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
-                        colormap(app.UIAxes_2, 'jet');
-                        colorbar(app.UIAxes_2);
-                        xlabel(app.UIAxes_2, 'X Coordinates');
-                        ylabel(app.UIAxes_2, 'Y Coordinates');
-                        title(app.UIAxes_2, ['Flux in X Direction']);
-                        
-                    case 'Flux Y'
-                        
-                        patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
-                        colormap(app.UIAxes_2, 'jet');
-                        colorbar(app.UIAxes_2);
-                        xlabel(app.UIAxes_2, 'X Coordinates');
-                        ylabel(app.UIAxes_2, 'Y Coordinates');
-                        title(app.UIAxes_2, ['Flux in Y Direction']);
-                        
+                if(app.Switch.Value == '1')
+                    switch app.plotType
+                        case 'Temperature'
+                            patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Temperature ']);
+                            
+                        case 'Flux X'
+                            patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in X Direction']);
+                            
+                        case 'Flux Y'
+                            patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in Y Direction']);
+                    end
+                elseif(app.Switch.Value == '0')
+                    switch app.plotType
+                        case 'Temperature'
+                            patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp', 'EdgeColor', 'none');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Temperature ']);
+                            
+                        case 'Flux X'
+                            patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp', 'EdgeColor', 'none');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in X Direction']);
+                            
+                        case 'Flux Y'
+                            patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp', 'EdgeColor', 'none');
+                            colormap(app.UIAxes_2, 'jet');
+                            colorbar(app.UIAxes_2);
+                            xlabel(app.UIAxes_2, 'X Coordinates');
+                            ylabel(app.UIAxes_2, 'Y Coordinates');
+                            title(app.UIAxes_2, ['Flux in Y Direction']);
+                    end
                 end
             end
         end
@@ -413,25 +412,21 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
         % Callback function
         function TestButtonPushed(app, event)
-            app.Lamp.Color = [0 1 0];
+            
         end
 
-        % Value changed function: EdgeDisplaySwitch
-        function EdgeDisplaySwitchValueChanged(app, event)
-            value = app.EdgeDisplaySwitch.Text;
-            app.TestEditField.Value = value;
+        % Value changed function: Switch
+        function SwitchValueChanged(app, event)
+            app.edgeSwitch = app.Switch.Value;
             
             if(app.didPlotHappen)
-                if (value == "On") %refer to beginning plotting function
-                    app.UIAxes_2.cla;
-                    load('X_1.mat', 'X_1');
-                    load('Y_1.mat', 'Y_1');
-                    load('T.mat', 'T');
-                    load('flux_x.mat', 'flux_x');
-                    load('flux_y.mat', 'flux_y');
-                    
+                load('X_1.mat', 'X_1');
+                load('Y_1.mat', 'Y_1');
+                load('T.mat', 'T');
+                load('flux_x.mat', 'flux_x');
+                load('flux_y.mat', 'flux_y');
+                if(app.Switch.Value == '1')
                     switch app.plotType
-                        
                         case 'Temperature'
                             patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp');
                             colormap(app.UIAxes_2, 'jet');
@@ -441,7 +436,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
                             title(app.UIAxes_2, ['Temperature ']);
                             
                         case 'Flux X'
-                            
                             patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
                             colormap(app.UIAxes_2, 'jet');
                             colorbar(app.UIAxes_2);
@@ -450,25 +444,15 @@ classdef FEMGui_2 < matlab.apps.AppBase
                             title(app.UIAxes_2, ['Flux in X Direction']);
                             
                         case 'Flux Y'
-                            
                             patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
                             colormap(app.UIAxes_2, 'jet');
                             colorbar(app.UIAxes_2);
                             xlabel(app.UIAxes_2, 'X Coordinates');
                             ylabel(app.UIAxes_2, 'Y Coordinates');
                             title(app.UIAxes_2, ['Flux in Y Direction']);
-                            
                     end
-                elseif (value == "Off")
-                    app.UIAxes_2.cla;
-                    load('X_1.mat', 'X_1');
-                    load('Y_1.mat', 'Y_1');
-                    load('T.mat', 'T');
-                    load('flux_x.mat', 'flux_x');
-                    load('flux_y.mat', 'flux_y');
-                    
-                    switch plotType
-                        
+                elseif(app.Switch.Value == '0')
+                    switch app.plotType
                         case 'Temperature'
                             patch(app.UIAxes_2, X_1,Y_1,T,'FaceColor','interp', 'EdgeColor', 'none');
                             colormap(app.UIAxes_2, 'jet');
@@ -478,7 +462,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
                             title(app.UIAxes_2, ['Temperature ']);
                             
                         case 'Flux X'
-                            
                             patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp', 'EdgeColor', 'none');
                             colormap(app.UIAxes_2, 'jet');
                             colorbar(app.UIAxes_2);
@@ -487,14 +470,12 @@ classdef FEMGui_2 < matlab.apps.AppBase
                             title(app.UIAxes_2, ['Flux in X Direction']);
                             
                         case 'Flux Y'
-                            
                             patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp', 'EdgeColor', 'none');
                             colormap(app.UIAxes_2, 'jet');
                             colorbar(app.UIAxes_2);
                             xlabel(app.UIAxes_2, 'X Coordinates');
                             ylabel(app.UIAxes_2, 'Y Coordinates');
                             title(app.UIAxes_2, ['Flux in Y Direction']);
-                            
                     end
                 end
             end
@@ -594,9 +575,9 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create UIAxes
             app.UIAxes = uiaxes(app.UIFigure);
-            title(app.UIAxes, '', 'Interpreter', 'latex')
-            xlabel(app.UIAxes, '', 'Interpreter', 'latex')
-            ylabel(app.UIAxes, '', 'Interpreter', 'latex')
+            title(app.UIAxes, '')
+            xlabel(app.UIAxes, '')
+            ylabel(app.UIAxes, '')
             app.UIAxes.GridColor = [0 0 0];
             app.UIAxes.XColor = 'none';
             app.UIAxes.XTick = [];
@@ -649,9 +630,9 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create UIAxes_2
             app.UIAxes_2 = uiaxes(app.UIFigure);
-            title(app.UIAxes_2, '', 'Interpreter', 'latex')
-            xlabel(app.UIAxes_2, '', 'Interpreter', 'latex')
-            ylabel(app.UIAxes_2, '', 'Interpreter', 'latex')
+            title(app.UIAxes_2, '')
+            xlabel(app.UIAxes_2, '')
+            ylabel(app.UIAxes_2, '')
             app.UIAxes_2.GridColor = [0 0 0];
             app.UIAxes_2.XColor = 'none';
             app.UIAxes_2.XTick = [];
@@ -724,9 +705,9 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create UIAxes_3
             app.UIAxes_3 = uiaxes(app.UIFigure);
-            title(app.UIAxes_3, '', 'Interpreter', 'latex')
-            xlabel(app.UIAxes_3, '', 'Interpreter', 'latex')
-            ylabel(app.UIAxes_3, '', 'Interpreter', 'latex')
+            title(app.UIAxes_3, '')
+            xlabel(app.UIAxes_3, '')
+            ylabel(app.UIAxes_3, '')
             app.UIAxes_3.GridColor = [0 0 0];
             app.UIAxes_3.XColor = 'none';
             app.UIAxes_3.XTick = [];
@@ -832,20 +813,12 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.EdgeDisplaySwitchLabel.Position = [402.5 29 76 22];
             app.EdgeDisplaySwitchLabel.Text = 'Edge Display';
 
-            % Create EdgeDisplaySwitch
-            app.EdgeDisplaySwitch = uiswitch(app.UIFigure, 'slider');
-            app.EdgeDisplaySwitch.ValueChangedFcn = createCallbackFcn(app, @EdgeDisplaySwitchValueChanged, true);
-            app.EdgeDisplaySwitch.Position = [417 66 45 20];
-
-            % Create TestEditFieldLabel
-            app.TestEditFieldLabel = uilabel(app.UIFigure);
-            app.TestEditFieldLabel.HorizontalAlignment = 'right';
-            app.TestEditFieldLabel.Position = [75 434 28 22];
-            app.TestEditFieldLabel.Text = 'Test';
-
-            % Create TestEditField
-            app.TestEditField = uieditfield(app.UIFigure, 'numeric');
-            app.TestEditField.Position = [118 434 100 22];
+            % Create Switch
+            app.Switch = uiswitch(app.UIFigure, 'slider');
+            app.Switch.ItemsData = {'0', '1'};
+            app.Switch.ValueChangedFcn = createCallbackFcn(app, @SwitchValueChanged, true);
+            app.Switch.Position = [417 66 45 20];
+            app.Switch.Value = '0';
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
