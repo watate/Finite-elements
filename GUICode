@@ -2,53 +2,40 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                   matlab.ui.Figure
-        aEditFieldLabel            matlab.ui.control.Label
-        a                          matlab.ui.control.NumericEditField
-        bEditFieldLabel            matlab.ui.control.Label
-        b                          matlab.ui.control.NumericEditField
-        cEditFieldLabel            matlab.ui.control.Label
-        c                          matlab.ui.control.NumericEditField
-        dEditFieldLabel            matlab.ui.control.Label
-        d                          matlab.ui.control.NumericEditField
-        ElementTypeDropDownLabel   matlab.ui.control.Label
-        ElementType                matlab.ui.control.DropDown
-        MeshCriteriaLabel          matlab.ui.control.Label
-        Button                     matlab.ui.control.Button
-        eEditFieldLabel            matlab.ui.control.Label
-        e                          matlab.ui.control.NumericEditField
-        UIAxes                     matlab.ui.control.UIAxes
-        GenerateButton             matlab.ui.control.Button
-        ElementsEditFieldLabel     matlab.ui.control.Label
-        Elements                   matlab.ui.control.NumericEditField
-        NodesEditField_2Label      matlab.ui.control.Label
-        Nodes                      matlab.ui.control.NumericEditField
-        MeshRefinementSliderLabel  matlab.ui.control.Label
-        MeshRefinementSlider       matlab.ui.control.Slider
-        UIAxes_2                   matlab.ui.control.UIAxes
-        Plot                       matlab.ui.control.Button
-        ColorbarButtonGroup        matlab.ui.container.ButtonGroup
-        Button_2                   matlab.ui.control.ToggleButton
-        Button_3                   matlab.ui.control.ToggleButton
+        UIFigure                      matlab.ui.Figure
+        aEditFieldLabel               matlab.ui.control.Label
+        a                             matlab.ui.control.NumericEditField
+        bEditFieldLabel               matlab.ui.control.Label
+        b                             matlab.ui.control.NumericEditField
+        cEditFieldLabel               matlab.ui.control.Label
+        c                             matlab.ui.control.NumericEditField
+        dEditFieldLabel               matlab.ui.control.Label
+        d                             matlab.ui.control.NumericEditField
+        ElementTypeDropDownLabel      matlab.ui.control.Label
+        ElementType                   matlab.ui.control.DropDown
+        MeshCriteriaLabel             matlab.ui.control.Label
+        Button                        matlab.ui.control.Button
+        eEditFieldLabel               matlab.ui.control.Label
+        e                             matlab.ui.control.NumericEditField
+        UIAxes                        matlab.ui.control.UIAxes
+        GenerateButton                matlab.ui.control.Button
+        ElementsEditFieldLabel        matlab.ui.control.Label
+        Elements                      matlab.ui.control.NumericEditField
+        NodesEditField_2Label         matlab.ui.control.Label
+        Nodes                         matlab.ui.control.NumericEditField
+        MeshRefinementSliderLabel     matlab.ui.control.Label
+        MeshRefinementSlider          matlab.ui.control.Slider
+        UIAxes_2                      matlab.ui.control.UIAxes
+        Plot                          matlab.ui.control.Button
+        ColorbarButtonGroup           matlab.ui.container.ButtonGroup
+        Button_2                      matlab.ui.control.ToggleButton
+        Button_3                      matlab.ui.control.ToggleButton
+        MaterialPropertieskEditFieldLabel  matlab.ui.control.Label
+        MaterialPropertieskEditField  matlab.ui.control.NumericEditField
     end
 
-    
-    properties (Access = private)
-        EL; NL; x; y; z; % Description
-    end
-    
-    methods (Access = private)
-        
-        function [NL, EL] = mesh_it(a1, b1, c1, d1, e1)
-        
-            if(app.ElementType.Value == "2DQU4N")
-                [NL, EL] = mesh_2(a1, b1, c1, d1, e1);
-            elseif(app.ElementType.Value == "2DTR3N")
-                [NL, EL] = mesh_mk_trig_2(a1, b1, c1, d1, e1);
-            end
-            
-        end
-    end
+ 
+ 
     
 
     % Callbacks that handle component events
@@ -64,12 +51,14 @@ classdef FEMGui_2 < matlab.apps.AppBase
             %EL = [1 2 5 4; 2 3 6 5; 4 5 8 7; 5 6 9 8];
             app.UIAxes.cla;
             
-            if(app.ElementType.Value == "2DQU4N")
-                [NL, EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
-            elseif(app.ElementType.Value == "2DTR3N")
-                [NL, EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
-            end
-            
+            [NL, EL] = mesh_it(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value, app.ElementType.Value);
+%             
+%             if(app.ElementType.Value == "2DQU4N")
+%                 [NL, EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+%             elseif(app.ElementType.Value == "2DTR3N")
+%                 [NL, EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+%             end
+%             
             NoN = size(NL, 1);
             NoE = size(EL, 1);
             NPE = size(EL, 2);
@@ -90,33 +79,25 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.Elements.Value = NoE;
             app.Nodes.Value = NoN;
             
+            
             save('EL.mat', 'EL');
             save('NL.mat', 'NL');
             save('x.mat', 'x');
             save('y.mat', 'y');
             save('z.mat', 'z');
             
+            
         end
 
         % Value changed function: MeshRefinementSlider
         function MeshRefinementSliderValueChanged(app, event)
-            value = app.MeshRefinementSlider.Value;
+            sliderValue = app.MeshRefinementSlider.Value;
             
-            
+            %Clear UIAxes
             app.UIAxes.cla;
             app.UIAxes_2.cla;
             
-            if(app.ElementType.Value == "2DQU4N")
-                [NL, EL] = mesh_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
-            elseif(app.ElementType.Value == "2DTR3N")
-                [NL, EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
-            end
-% 
-%             if(app.ElementType.Value == "2DQU4N")
-%                 [NL, EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
-%             elseif(app.ElementType.Value == "2DTR3N")
-%                 [NL, EL] = mesh_mk_trig(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
-%             end
+            [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(sliderValue), round(sliderValue), app.e.Value, app.ElementType.Value);
             
             
             NoN = size(NL, 1);
@@ -158,12 +139,12 @@ classdef FEMGui_2 < matlab.apps.AppBase
             save('x.mat', 'x');
             save('y.mat', 'y');
             save('z.mat', 'z');
-            
+
         end
 
         % Button pushed function: Plot
         function PlotButtonPushed(app, event)
-                   
+    
             load('EL.mat', 'EL');
             load('NL.mat', 'NL');
             
@@ -197,7 +178,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
             TL = arrayfun(@(x) sprintf('%.2f', x), T, 'un', 0);
             set(h_2, 'TickLabels', TL);
 
-            
         end
 
         % Selection changed function: ColorbarButtonGroup
@@ -401,6 +381,16 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.Button_3.Icon = 'parula.png';
             app.Button_3.Text = '';
             app.Button_3.Position = [83.5 13 32 62];
+
+            % Create MaterialPropertieskEditFieldLabel
+            app.MaterialPropertieskEditFieldLabel = uilabel(app.UIFigure);
+            app.MaterialPropertieskEditFieldLabel.HorizontalAlignment = 'right';
+            app.MaterialPropertieskEditFieldLabel.Position = [35 241 123 22];
+            app.MaterialPropertieskEditFieldLabel.Text = 'Material Properties (k)';
+
+            % Create MaterialPropertieskEditField
+            app.MaterialPropertieskEditField = uieditfield(app.UIFigure, 'numeric');
+            app.MaterialPropertieskEditField.Position = [35 220 100 22];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
