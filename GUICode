@@ -1,0 +1,437 @@
+classdef FEMGui_2 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                   matlab.ui.Figure
+        aEditFieldLabel            matlab.ui.control.Label
+        a                          matlab.ui.control.NumericEditField
+        bEditFieldLabel            matlab.ui.control.Label
+        b                          matlab.ui.control.NumericEditField
+        cEditFieldLabel            matlab.ui.control.Label
+        c                          matlab.ui.control.NumericEditField
+        dEditFieldLabel            matlab.ui.control.Label
+        d                          matlab.ui.control.NumericEditField
+        ElementTypeDropDownLabel   matlab.ui.control.Label
+        ElementType                matlab.ui.control.DropDown
+        MeshCriteriaLabel          matlab.ui.control.Label
+        Button                     matlab.ui.control.Button
+        eEditFieldLabel            matlab.ui.control.Label
+        e                          matlab.ui.control.NumericEditField
+        UIAxes                     matlab.ui.control.UIAxes
+        GenerateButton             matlab.ui.control.Button
+        ElementsEditFieldLabel     matlab.ui.control.Label
+        Elements                   matlab.ui.control.NumericEditField
+        NodesEditField_2Label      matlab.ui.control.Label
+        Nodes                      matlab.ui.control.NumericEditField
+        MeshRefinementSliderLabel  matlab.ui.control.Label
+        MeshRefinementSlider       matlab.ui.control.Slider
+        UIAxes_2                   matlab.ui.control.UIAxes
+        Plot                       matlab.ui.control.Button
+        ColorbarButtonGroup        matlab.ui.container.ButtonGroup
+        Button_2                   matlab.ui.control.ToggleButton
+        Button_3                   matlab.ui.control.ToggleButton
+    end
+
+    
+    properties (Access = private)
+        EL; NL; x; y; z; % Description
+    end
+    
+    methods (Access = private)
+        
+        function [NL, EL] = mesh_it(a1, b1, c1, d1, e1)
+        
+            if(app.ElementType.Value == "2DQU4N")
+                [NL, EL] = mesh_2(a1, b1, c1, d1, e1);
+            elseif(app.ElementType.Value == "2DTR3N")
+                [NL, EL] = mesh_mk_trig_2(a1, b1, c1, d1, e1);
+            end
+            
+        end
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: GenerateButton
+        function GenerateButtonPushed(app, event)
+            %Our mesh function code goes here
+            %Note that the way the nodes are numbered here are different
+            %(it goes in increasing order from left to right, bottom to
+            %top
+            %NL = [0 0; 1 0; 2 0; 0 1; 1 1; 2 1; 0 2; 1 2; 2 2]; %coordinates of our points
+            %EL = [1 2 5 4; 2 3 6 5; 4 5 8 7; 5 6 9 8];
+            app.UIAxes.cla;
+            
+%             [NL, EL] = mesh_it(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+            if(app.ElementType.Value == "2DQU4N")
+                [app.NL, app.EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+            elseif(app.ElementType.Value == "2DTR3N")
+                [app.NL, app.EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+            end
+            
+            NoN = size(app.NL, 1);
+            NoE = size(app.EL, 1);
+            NPE = size(app.EL, 2);
+            
+            for i = 1:NoE
+                nl = app.EL(i, 1:NPE);
+                for j = 1:NPE
+                    app.x(j,i) = app.NL(nl(j), 1);
+                    app.y(j,i) = app.NL(nl(j), 2);
+                    
+                end
+            end
+            
+            app.z = zeros(size(app.x,1), size(app.x,2));
+            
+            patch(app.UIAxes, app.x, app.y, app.z, 'FaceColor', 'none');
+            
+            app.Elements.Value = NoE;
+            app.Nodes.Value = NoN;
+            
+            %allows us to save data because other functions can't access
+            %data from this function
+%             save('EL.mat', 'EL');
+%             save('NL.mat', 'NL');
+%             save('x.mat', 'x');
+%             save('y.mat', 'y');
+%             save('z.mat', 'z');
+%             
+            
+        end
+
+        % Value changed function: MeshRefinementSlider
+        function MeshRefinementSliderValueChanged(app, event)
+            value = app.MeshRefinementSlider.Value;
+            
+            
+            app.UIAxes.cla;
+            app.UIAxes_2.cla;
+%             [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
+            
+            if(app.ElementType.Value == "2DQU4N")
+                [app.NL, app.EL] = mesh_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
+            elseif(app.ElementType.Value == "2DTR3N")
+                [app.NL, app.EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
+            end
+            
+            
+            NoN = size(app.NL, 1);
+            NoE = size(app.EL, 1);
+            NPE = size(app.EL, 2);
+            
+            for i = 1:NoE
+                nl = app.EL(i, 1:NPE);
+                for j = 1:NPE
+                    app.x(j,i) = app.NL(nl(j), 1);
+                    app.y(j,i) = app.NL(nl(j), 2);
+                    
+                end
+            end
+            
+            app.z = zeros(size(app.x,1), size(app.x,2));
+            
+            patch(app.UIAxes, app.x, app.y, app.z, 'FaceColor', 'none');
+            
+            app.Elements.Value = NoE;
+            app.Nodes.Value = NoN;
+            
+            %%% This part does the mesh for the coloured graph
+            for i = 1:NoE
+                nl = app.EL(i, 1:NPE);
+                for j = 1:NPE
+                    app.x(j,i) = app.NL(nl(j), 1);
+                    app.y(j,i) = app.NL(nl(j), 2);
+                    app.z(j, i) = 0;
+                    %c(j, i) = app.x(j, i);
+                    
+                end
+            end
+            
+            %patch(app.UIAxes_2, app.x, app.y, app.z, c);
+            patch(app.UIAxes_2, app.x, app.y, app.z, app.x);
+            
+            %allows us to save data because other functions can't access
+            %data from this function
+%             save('EL.mat', 'EL');
+%             save('NL.mat', 'NL');
+%             save('x.mat', 'x');
+%             save('y.mat', 'y');
+%             save('z.mat', 'z');
+        end
+
+        % Button pushed function: Plot
+        function PlotButtonPushed(app, event)
+            
+%             load('EL.mat', 'EL');
+%             load('NL.mat', 'NL');
+            
+            NoN = size(app.NL, 1);
+            NoE = size(app.EL, 1);
+            NPE = size(app.EL, 2);
+            
+            for i = 1:NoE
+                nl = app.EL(i, 1:NPE);
+                for j = 1:NPE
+                    app.x(j,i) = app.NL(nl(j), 1);
+                    app.y(j,i) = app.NL(nl(j), 2);
+                    app.z(j, i) = 0;
+                    %c(j, i) = app.x(j, i);
+                    
+                end
+            end
+            
+            patch(app.UIAxes_2, app.x, app.y, app.z, app.x);
+            %patch(app.UIAxes_2, app.x, app.y, app.z, c);
+            colormap(app.UIAxes_2, 'jet');
+            
+            hold(app.UIAxes_2, 'on');
+            set(app.UIAxes_2, 'View', [0 90]);
+            
+            %to set limit on color maps
+
+            h_2 = colorbar(app.UIAxes_2);
+            t=get(h_2, 'Limits');
+            T = linspace(t(1), t(2), 5);
+            set(h_2, 'Ticks', T);
+            TL = arrayfun(@(x) sprintf('%.2f', x), T, 'un', 0);
+            set(h_2, 'TickLabels', TL);
+
+            
+            
+        end
+
+        % Selection changed function: ColorbarButtonGroup
+        function ColorbarButtonGroupSelectionChanged(app, event)
+            selectedButton = app.ColorbarButtonGroup.SelectedObject;
+            switch app.ColorbarButtonGroup.SelectedObject.Icon
+                case 'jet.png'
+                    colormap(app.UIAxes_2, 'jet');
+                case 'parula.png'
+                    colormap(app.UIAxes_2, 'parula');
+            end
+        end
+
+        % Value changed function: ElementType
+        function ElementTypeValueChanged(app, event)
+            value = app.ElementType.Value;
+            MeshRefinementSliderValueChanged(app, event);
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'UI Figure';
+
+            % Create aEditFieldLabel
+            app.aEditFieldLabel = uilabel(app.UIFigure);
+            app.aEditFieldLabel.HorizontalAlignment = 'right';
+            app.aEditFieldLabel.Position = [157 432 25 22];
+            app.aEditFieldLabel.Text = 'a';
+
+            % Create a
+            app.a = uieditfield(app.UIFigure, 'numeric');
+            app.a.Position = [197 432 36 22];
+            app.a.Value = 1;
+
+            % Create bEditFieldLabel
+            app.bEditFieldLabel = uilabel(app.UIFigure);
+            app.bEditFieldLabel.HorizontalAlignment = 'right';
+            app.bEditFieldLabel.Position = [157 405 25 22];
+            app.bEditFieldLabel.Text = 'b';
+
+            % Create b
+            app.b = uieditfield(app.UIFigure, 'numeric');
+            app.b.Position = [197 405 36 22];
+            app.b.Value = 1;
+
+            % Create cEditFieldLabel
+            app.cEditFieldLabel = uilabel(app.UIFigure);
+            app.cEditFieldLabel.HorizontalAlignment = 'right';
+            app.cEditFieldLabel.Position = [157 378 25 22];
+            app.cEditFieldLabel.Text = 'c';
+
+            % Create c
+            app.c = uieditfield(app.UIFigure, 'numeric');
+            app.c.Position = [197 378 36 22];
+            app.c.Value = 5;
+
+            % Create dEditFieldLabel
+            app.dEditFieldLabel = uilabel(app.UIFigure);
+            app.dEditFieldLabel.HorizontalAlignment = 'right';
+            app.dEditFieldLabel.Position = [157 351 25 22];
+            app.dEditFieldLabel.Text = 'd';
+
+            % Create d
+            app.d = uieditfield(app.UIFigure, 'numeric');
+            app.d.Position = [197 351 36 22];
+            app.d.Value = 5;
+
+            % Create ElementTypeDropDownLabel
+            app.ElementTypeDropDownLabel = uilabel(app.UIFigure);
+            app.ElementTypeDropDownLabel.HorizontalAlignment = 'right';
+            app.ElementTypeDropDownLabel.Position = [50 283 79 22];
+            app.ElementTypeDropDownLabel.Text = 'Element Type';
+
+            % Create ElementType
+            app.ElementType = uidropdown(app.UIFigure);
+            app.ElementType.Items = {'2DTR3N', '2DQU4N'};
+            app.ElementType.ValueChangedFcn = createCallbackFcn(app, @ElementTypeValueChanged, true);
+            app.ElementType.Position = [144 283 82 22];
+            app.ElementType.Value = '2DTR3N';
+
+            % Create MeshCriteriaLabel
+            app.MeshCriteriaLabel = uilabel(app.UIFigure);
+            app.MeshCriteriaLabel.FontWeight = 'bold';
+            app.MeshCriteriaLabel.Position = [50 443 81 22];
+            app.MeshCriteriaLabel.Text = 'Mesh Criteria';
+
+            % Create Button
+            app.Button = uibutton(app.UIFigure, 'push');
+            app.Button.Icon = 'circle.png';
+            app.Button.Position = [48 349 104 87];
+            app.Button.Text = '';
+
+            % Create eEditFieldLabel
+            app.eEditFieldLabel = uilabel(app.UIFigure);
+            app.eEditFieldLabel.HorizontalAlignment = 'right';
+            app.eEditFieldLabel.Position = [157 324 25 22];
+            app.eEditFieldLabel.Text = 'e';
+
+            % Create e
+            app.e = uieditfield(app.UIFigure, 'numeric');
+            app.e.Position = [197 324 36 22];
+            app.e.Value = 0.2;
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, '')
+            xlabel(app.UIAxes, '')
+            ylabel(app.UIAxes, '')
+            app.UIAxes.GridColor = [0 0 0];
+            app.UIAxes.XColor = 'none';
+            app.UIAxes.XTick = [];
+            app.UIAxes.YColor = 'none';
+            app.UIAxes.YTick = [];
+            app.UIAxes.ZColor = 'none';
+            app.UIAxes.Position = [344 304 150 150];
+
+            % Create GenerateButton
+            app.GenerateButton = uibutton(app.UIFigure, 'push');
+            app.GenerateButton.ButtonPushedFcn = createCallbackFcn(app, @GenerateButtonPushed, true);
+            app.GenerateButton.Position = [514 381 100 22];
+            app.GenerateButton.Text = 'Generate';
+
+            % Create ElementsEditFieldLabel
+            app.ElementsEditFieldLabel = uilabel(app.UIFigure);
+            app.ElementsEditFieldLabel.HorizontalAlignment = 'right';
+            app.ElementsEditFieldLabel.Position = [514 443 62 22];
+            app.ElementsEditFieldLabel.Text = '#Elements';
+
+            % Create Elements
+            app.Elements = uieditfield(app.UIFigure, 'numeric');
+            app.Elements.Editable = 'off';
+            app.Elements.Position = [514 421 100 23];
+
+            % Create NodesEditField_2Label
+            app.NodesEditField_2Label = uilabel(app.UIFigure);
+            app.NodesEditField_2Label.HorizontalAlignment = 'right';
+            app.NodesEditField_2Label.Position = [514 341 47 22];
+            app.NodesEditField_2Label.Text = '#Nodes';
+
+            % Create Nodes
+            app.Nodes = uieditfield(app.UIFigure, 'numeric');
+            app.Nodes.Editable = 'off';
+            app.Nodes.Position = [514 321 100 21];
+
+            % Create MeshRefinementSliderLabel
+            app.MeshRefinementSliderLabel = uilabel(app.UIFigure);
+            app.MeshRefinementSliderLabel.HorizontalAlignment = 'right';
+            app.MeshRefinementSliderLabel.Position = [261 262 100 22];
+            app.MeshRefinementSliderLabel.Text = 'Mesh Refinement';
+
+            % Create MeshRefinementSlider
+            app.MeshRefinementSlider = uislider(app.UIFigure);
+            app.MeshRefinementSlider.Limits = [0 20];
+            app.MeshRefinementSlider.ValueChangedFcn = createCallbackFcn(app, @MeshRefinementSliderValueChanged, true);
+            app.MeshRefinementSlider.Position = [382 271 150 3];
+
+            % Create UIAxes_2
+            app.UIAxes_2 = uiaxes(app.UIFigure);
+            title(app.UIAxes_2, '')
+            xlabel(app.UIAxes_2, '')
+            ylabel(app.UIAxes_2, '')
+            app.UIAxes_2.GridColor = [0 0 0];
+            app.UIAxes_2.XColor = 'none';
+            app.UIAxes_2.XTick = [];
+            app.UIAxes_2.YColor = 'none';
+            app.UIAxes_2.YTick = [];
+            app.UIAxes_2.ZColor = 'none';
+            app.UIAxes_2.Position = [344 30 200 150];
+
+            % Create Plot
+            app.Plot = uibutton(app.UIFigure, 'push');
+            app.Plot.ButtonPushedFcn = createCallbackFcn(app, @PlotButtonPushed, true);
+            app.Plot.Position = [58 122 100 22];
+            app.Plot.Text = 'Plot';
+
+            % Create ColorbarButtonGroup
+            app.ColorbarButtonGroup = uibuttongroup(app.UIFigure);
+            app.ColorbarButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ColorbarButtonGroupSelectionChanged, true);
+            app.ColorbarButtonGroup.TitlePosition = 'centertop';
+            app.ColorbarButtonGroup.Title = 'Colorbar';
+            app.ColorbarButtonGroup.Position = [181 74 122.992713928223 105.997970581055];
+
+            % Create Button_2
+            app.Button_2 = uitogglebutton(app.ColorbarButtonGroup);
+            app.Button_2.Icon = 'jet.png';
+            app.Button_2.Text = '';
+            app.Button_2.BackgroundColor = [1 1 1];
+            app.Button_2.Position = [7.5 13 32 62];
+            app.Button_2.Value = true;
+
+            % Create Button_3
+            app.Button_3 = uitogglebutton(app.ColorbarButtonGroup);
+            app.Button_3.Icon = 'parula.png';
+            app.Button_3.Text = '';
+            app.Button_3.Position = [83.5 13 32 62];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = FEMGui_2
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
