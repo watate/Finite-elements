@@ -64,41 +64,37 @@ classdef FEMGui_2 < matlab.apps.AppBase
             %EL = [1 2 5 4; 2 3 6 5; 4 5 8 7; 5 6 9 8];
             app.UIAxes.cla;
             
-%             [NL, EL] = mesh_it(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
             if(app.ElementType.Value == "2DQU4N")
-                [app.NL, app.EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+                [NL, EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
             elseif(app.ElementType.Value == "2DTR3N")
-                [app.NL, app.EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+                [NL, EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
             end
             
-            NoN = size(app.NL, 1);
-            NoE = size(app.EL, 1);
-            NPE = size(app.EL, 2);
+            NoN = size(NL, 1);
+            NoE = size(EL, 1);
+            NPE = size(EL, 2);
             
             for i = 1:NoE
-                nl = app.EL(i, 1:NPE);
+                nl = EL(i, 1:NPE);
                 for j = 1:NPE
-                    app.x(j,i) = app.NL(nl(j), 1);
-                    app.y(j,i) = app.NL(nl(j), 2);
+                    x(j,i) = NL(nl(j), 1);
+                    y(j,i) = NL(nl(j), 2);
                     
                 end
             end
             
-            app.z = zeros(size(app.x,1), size(app.x,2));
+            z = zeros(size(x,1), size(x,2));
             
-            patch(app.UIAxes, app.x, app.y, app.z, 'FaceColor', 'none');
+            patch(app.UIAxes, x, y, z, 'FaceColor', 'none');
             
             app.Elements.Value = NoE;
             app.Nodes.Value = NoN;
             
-            %allows us to save data because other functions can't access
-            %data from this function
-%             save('EL.mat', 'EL');
-%             save('NL.mat', 'NL');
-%             save('x.mat', 'x');
-%             save('y.mat', 'y');
-%             save('z.mat', 'z');
-%             
+            save('EL.mat', 'EL');
+            save('NL.mat', 'NL');
+            save('x.mat', 'x');
+            save('y.mat', 'y');
+            save('z.mat', 'z');
             
         end
 
@@ -109,82 +105,84 @@ classdef FEMGui_2 < matlab.apps.AppBase
             
             app.UIAxes.cla;
             app.UIAxes_2.cla;
-%             [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
             
             if(app.ElementType.Value == "2DQU4N")
-                [app.NL, app.EL] = mesh_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
+                [NL, EL] = mesh_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
             elseif(app.ElementType.Value == "2DTR3N")
-                [app.NL, app.EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
+                [NL, EL] = mesh_mk_trig_2(app.a.Value, app.b.Value, round(value), round(value), app.e.Value);
             end
+% 
+%             if(app.ElementType.Value == "2DQU4N")
+%                 [NL, EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+%             elseif(app.ElementType.Value == "2DTR3N")
+%                 [NL, EL] = mesh_mk_trig(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
+%             end
             
             
-            NoN = size(app.NL, 1);
-            NoE = size(app.EL, 1);
-            NPE = size(app.EL, 2);
+            NoN = size(NL, 1);
+            NoE = size(EL, 1);
+            NPE = size(EL, 2);
             
             for i = 1:NoE
-                nl = app.EL(i, 1:NPE);
+                nl = EL(i, 1:NPE);
                 for j = 1:NPE
-                    app.x(j,i) = app.NL(nl(j), 1);
-                    app.y(j,i) = app.NL(nl(j), 2);
+                    x(j,i) = NL(nl(j), 1);
+                    y(j,i) = NL(nl(j), 2);
                     
                 end
             end
             
-            app.z = zeros(size(app.x,1), size(app.x,2));
+            z = zeros(size(x,1), size(x,2));
             
-            patch(app.UIAxes, app.x, app.y, app.z, 'FaceColor', 'none');
+            patch(app.UIAxes, x, y, z, 'FaceColor', 'none');
             
             app.Elements.Value = NoE;
             app.Nodes.Value = NoN;
             
             %%% This part does the mesh for the coloured graph
             for i = 1:NoE
-                nl = app.EL(i, 1:NPE);
+                nl = EL(i, 1:NPE);
                 for j = 1:NPE
-                    app.x(j,i) = app.NL(nl(j), 1);
-                    app.y(j,i) = app.NL(nl(j), 2);
-                    app.z(j, i) = 0;
-                    %c(j, i) = app.x(j, i);
+                    x(j,i) = NL(nl(j), 1);
+                    y(j,i) = NL(nl(j), 2);
+                    z(j, i) = 0;
+                    c(j, i) = x(j, i);
                     
                 end
             end
             
-            %patch(app.UIAxes_2, app.x, app.y, app.z, c);
-            patch(app.UIAxes_2, app.x, app.y, app.z, app.x);
+            patch(app.UIAxes_2, x, y, z, c);
             
-            %allows us to save data because other functions can't access
-            %data from this function
-%             save('EL.mat', 'EL');
-%             save('NL.mat', 'NL');
-%             save('x.mat', 'x');
-%             save('y.mat', 'y');
-%             save('z.mat', 'z');
+            save('EL.mat', 'EL');
+            save('NL.mat', 'NL');
+            save('x.mat', 'x');
+            save('y.mat', 'y');
+            save('z.mat', 'z');
+            
         end
 
         % Button pushed function: Plot
         function PlotButtonPushed(app, event)
+                   
+            load('EL.mat', 'EL');
+            load('NL.mat', 'NL');
             
-%             load('EL.mat', 'EL');
-%             load('NL.mat', 'NL');
-            
-            NoN = size(app.NL, 1);
-            NoE = size(app.EL, 1);
-            NPE = size(app.EL, 2);
+            NoN = size(NL, 1);
+            NoE = size(EL, 1);
+            NPE = size(EL, 2);
             
             for i = 1:NoE
-                nl = app.EL(i, 1:NPE);
+                nl = EL(i, 1:NPE);
                 for j = 1:NPE
-                    app.x(j,i) = app.NL(nl(j), 1);
-                    app.y(j,i) = app.NL(nl(j), 2);
-                    app.z(j, i) = 0;
-                    %c(j, i) = app.x(j, i);
+                    x(j,i) = NL(nl(j), 1);
+                    y(j,i) = NL(nl(j), 2);
+                    z(j, i) = 0;
+                    c(j, i) = x(j, i);
                     
                 end
             end
             
-            patch(app.UIAxes_2, app.x, app.y, app.z, app.x);
-            %patch(app.UIAxes_2, app.x, app.y, app.z, c);
+            patch(app.UIAxes_2, x, y, z, c);
             colormap(app.UIAxes_2, 'jet');
             
             hold(app.UIAxes_2, 'on');
@@ -199,7 +197,6 @@ classdef FEMGui_2 < matlab.apps.AppBase
             TL = arrayfun(@(x) sprintf('%.2f', x), T, 'un', 0);
             set(h_2, 'TickLabels', TL);
 
-            
             
         end
 
