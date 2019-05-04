@@ -49,6 +49,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
         DropDown                        matlab.ui.control.DropDown
         ComputationTimesEditFieldLabel  matlab.ui.control.Label
         ComputationTimesEditField       matlab.ui.control.NumericEditField
+        TestingEditFieldLabel           matlab.ui.control.Label
+        TestingEditField                matlab.ui.control.EditField
     end
 
  
@@ -154,6 +156,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             load('x.mat', 'x');
             load('y.mat', 'y');
             
+            app.UIAxes_2.cla;
             
             %initialize plotting variables
             NoN = size(NL, 1);
@@ -163,6 +166,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             T = app.TemperatureMagnitudeEditField.Value;
             k = app.ConductivitykEditField.Value;
             plotType = app.DropDown.Value;
+            app.TestingEditField.Value = plotType;
             
             tic 
             [NL, EL, ENL] = FEM(NL, EL, BC_flag, T, k);
@@ -200,7 +204,9 @@ classdef FEMGui_2 < matlab.apps.AppBase
                     %colorbar(parula(5))
                 case 'Flux X'
                     
-                    patch(app.UIAxes_2, X_1,Y_1,flux_x);
+                    app.TestingEditField.Value = 'Flux X is running';
+                    
+                    patch(app.UIAxes_2, X_1,Y_1,flux_x,'FaceColor','interp');
                     colormap(app.UIAxes_2, 'jet');
                     colorbar(app.UIAxes_2);
                     xlabel(app.UIAxes_2, 'X Coordinates');
@@ -211,6 +217,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 case 'Flux Y'
+                    
+                    app.TestingEditField.Value = 'Flux Y is running';
                     
                     patch(app.UIAxes_2, X_1,Y_1,flux_y,'FaceColor','interp');
                     colormap(app.UIAxes_2, 'jet');
@@ -261,6 +269,12 @@ classdef FEMGui_2 < matlab.apps.AppBase
         % Selection changed function: DeformationTypeButtonGroup_2
         function DeformationTypeButtonGroup_2SelectionChanged(app, event)
             selectedButton = app.DeformationTypeButtonGroup_2.SelectedObject;
+        end
+
+        % Value changed function: DropDown
+        function DropDownValueChanged(app, event)
+            plotType = app.DropDown.Value;
+            
         end
     end
 
@@ -549,7 +563,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create DropDown
             app.DropDown = uidropdown(app.UIFigure);
-            app.DropDown.Items = {'Temperature', ' Flux X', ' Flux Y'};
+            app.DropDown.Items = {'Temperature', 'Flux X', 'Flux Y'};
+            app.DropDown.ValueChangedFcn = createCallbackFcn(app, @DropDownValueChanged, true);
             app.DropDown.Position = [384 93 100 22];
             app.DropDown.Value = 'Temperature';
 
@@ -563,6 +578,16 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.ComputationTimesEditField = uieditfield(app.UIFigure, 'numeric');
             app.ComputationTimesEditField.Editable = 'off';
             app.ComputationTimesEditField.Position = [384 29 100 22];
+
+            % Create TestingEditFieldLabel
+            app.TestingEditFieldLabel = uilabel(app.UIFigure);
+            app.TestingEditFieldLabel.HorizontalAlignment = 'right';
+            app.TestingEditFieldLabel.Position = [45 428 44 22];
+            app.TestingEditFieldLabel.Text = 'Testing';
+
+            % Create TestingEditField
+            app.TestingEditField = uieditfield(app.UIFigure, 'text');
+            app.TestingEditField.Position = [104 428 100 22];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
