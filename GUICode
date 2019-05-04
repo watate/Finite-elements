@@ -198,8 +198,8 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
         % Value changed function: ElementType
         function ElementTypeValueChanged(app, event)
-            value = app.ElementType.Value;
-            MeshRefinementSliderValueChanged(app, event);
+            GenerateButtonPushed(app, event);
+            PlotButtonPushed(app, event);
         end
     end
 
