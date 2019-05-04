@@ -2,36 +2,40 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                      matlab.ui.Figure
-        aEditFieldLabel               matlab.ui.control.Label
-        a                             matlab.ui.control.NumericEditField
-        bEditFieldLabel               matlab.ui.control.Label
-        b                             matlab.ui.control.NumericEditField
-        cEditFieldLabel               matlab.ui.control.Label
-        c                             matlab.ui.control.NumericEditField
-        dEditFieldLabel               matlab.ui.control.Label
-        d                             matlab.ui.control.NumericEditField
-        ElementTypeDropDownLabel      matlab.ui.control.Label
-        ElementType                   matlab.ui.control.DropDown
-        MeshCriteriaLabel             matlab.ui.control.Label
-        Button                        matlab.ui.control.Button
-        eEditFieldLabel               matlab.ui.control.Label
-        e                             matlab.ui.control.NumericEditField
-        UIAxes                        matlab.ui.control.UIAxes
-        GenerateButton                matlab.ui.control.Button
-        ElementsEditFieldLabel        matlab.ui.control.Label
-        Elements                      matlab.ui.control.NumericEditField
-        NodesEditField_2Label         matlab.ui.control.Label
-        Nodes                         matlab.ui.control.NumericEditField
-        MeshRefinementSliderLabel     matlab.ui.control.Label
-        MeshRefinementSlider          matlab.ui.control.Slider
-        UIAxes_2                      matlab.ui.control.UIAxes
-        Plot                          matlab.ui.control.Button
-        ColorbarButtonGroup           matlab.ui.container.ButtonGroup
-        Button_2                      matlab.ui.control.ToggleButton
-        Button_3                      matlab.ui.control.ToggleButton
+        UIFigure                       matlab.ui.Figure
+        aEditFieldLabel                matlab.ui.control.Label
+        a                              matlab.ui.control.NumericEditField
+        bEditFieldLabel                matlab.ui.control.Label
+        b                              matlab.ui.control.NumericEditField
+        cEditFieldLabel                matlab.ui.control.Label
+        c                              matlab.ui.control.NumericEditField
+        dEditFieldLabel                matlab.ui.control.Label
+        d                              matlab.ui.control.NumericEditField
+        ElementTypeDropDownLabel       matlab.ui.control.Label
+        ElementType                    matlab.ui.control.DropDown
+        MeshCriteriaLabel              matlab.ui.control.Label
+        Button                         matlab.ui.control.Button
+        eEditFieldLabel                matlab.ui.control.Label
+        e                              matlab.ui.control.NumericEditField
+        UIAxes                         matlab.ui.control.UIAxes
+        GenerateButton                 matlab.ui.control.Button
+        ElementsEditFieldLabel         matlab.ui.control.Label
+        Elements                       matlab.ui.control.NumericEditField
+        NodesEditField_2Label          matlab.ui.control.Label
+        Nodes                          matlab.ui.control.NumericEditField
+        MeshRefinementSliderLabel      matlab.ui.control.Label
+        MeshRefinementSlider           matlab.ui.control.Slider
+        UIAxes_2                       matlab.ui.control.UIAxes
+        Plot                           matlab.ui.control.Button
+        ColorbarButtonGroup            matlab.ui.container.ButtonGroup
+        Button_2                       matlab.ui.control.ToggleButton
+        Button_3                       matlab.ui.control.ToggleButton
         MaterialPropertieskEditFieldLabel  matlab.ui.control.Label
-        MaterialPropertieskEditField  matlab.ui.control.NumericEditField
+        MaterialPropertieskEditField   matlab.ui.control.NumericEditField
+        PreProcessLabel                matlab.ui.control.Label
+        TemperatureMagnitudeEditFieldLabel  matlab.ui.control.Label
+        TemperatureMagnitudeEditField  matlab.ui.control.NumericEditField
+        UIAxes_3                       matlab.ui.control.UIAxes
     end
 
  
@@ -51,7 +55,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             %EL = [1 2 5 4; 2 3 6 5; 4 5 8 7; 5 6 9 8];
             app.UIAxes.cla;
             
-            [NL, EL] = mesh_it(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value, app.ElementType.Value);
+            [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(app.c.Value), round(app.d.Value), app.e.Value, app.ElementType.Value);
 %             
 %             if(app.ElementType.Value == "2DQU4N")
 %                 [NL, EL] = mesh_2(app.a.Value, app.b.Value, app.c.Value, app.d.Value, app.e.Value);
@@ -91,13 +95,14 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
         % Value changed function: MeshRefinementSlider
         function MeshRefinementSliderValueChanged(app, event)
-            sliderValue = app.MeshRefinementSlider.Value;
+            app.c.Value = app.MeshRefinementSlider.Value;
+            app.d.Value = app.MeshRefinementSlider.Value;
             
             %Clear UIAxes
             app.UIAxes.cla;
             app.UIAxes_2.cla;
             
-            [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(sliderValue), round(sliderValue), app.e.Value, app.ElementType.Value);
+            [NL, EL] = mesh_it(app.a.Value, app.b.Value, round(app.c.Value), round(app.d.Value), app.e.Value, app.ElementType.Value);
             
             
             NoN = size(NL, 1);
@@ -206,87 +211,87 @@ classdef FEMGui_2 < matlab.apps.AppBase
 
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Position = [100 100 661 482];
             app.UIFigure.Name = 'UI Figure';
 
             % Create aEditFieldLabel
             app.aEditFieldLabel = uilabel(app.UIFigure);
             app.aEditFieldLabel.HorizontalAlignment = 'right';
-            app.aEditFieldLabel.Position = [157 432 25 22];
+            app.aEditFieldLabel.Position = [157 434 25 22];
             app.aEditFieldLabel.Text = 'a';
 
             % Create a
             app.a = uieditfield(app.UIFigure, 'numeric');
-            app.a.Position = [197 432 36 22];
+            app.a.Position = [197 434 36 22];
             app.a.Value = 1;
 
             % Create bEditFieldLabel
             app.bEditFieldLabel = uilabel(app.UIFigure);
             app.bEditFieldLabel.HorizontalAlignment = 'right';
-            app.bEditFieldLabel.Position = [157 405 25 22];
+            app.bEditFieldLabel.Position = [157 407 25 22];
             app.bEditFieldLabel.Text = 'b';
 
             % Create b
             app.b = uieditfield(app.UIFigure, 'numeric');
-            app.b.Position = [197 405 36 22];
+            app.b.Position = [197 407 36 22];
             app.b.Value = 1;
 
             % Create cEditFieldLabel
             app.cEditFieldLabel = uilabel(app.UIFigure);
             app.cEditFieldLabel.HorizontalAlignment = 'right';
-            app.cEditFieldLabel.Position = [157 378 25 22];
+            app.cEditFieldLabel.Position = [157 380 25 22];
             app.cEditFieldLabel.Text = 'c';
 
             % Create c
             app.c = uieditfield(app.UIFigure, 'numeric');
-            app.c.Position = [197 378 36 22];
+            app.c.Position = [197 380 36 22];
             app.c.Value = 5;
 
             % Create dEditFieldLabel
             app.dEditFieldLabel = uilabel(app.UIFigure);
             app.dEditFieldLabel.HorizontalAlignment = 'right';
-            app.dEditFieldLabel.Position = [157 351 25 22];
+            app.dEditFieldLabel.Position = [157 353 25 22];
             app.dEditFieldLabel.Text = 'd';
 
             % Create d
             app.d = uieditfield(app.UIFigure, 'numeric');
-            app.d.Position = [197 351 36 22];
+            app.d.Position = [197 353 36 22];
             app.d.Value = 5;
 
             % Create ElementTypeDropDownLabel
             app.ElementTypeDropDownLabel = uilabel(app.UIFigure);
             app.ElementTypeDropDownLabel.HorizontalAlignment = 'right';
-            app.ElementTypeDropDownLabel.Position = [50 283 79 22];
+            app.ElementTypeDropDownLabel.Position = [250 384 79 22];
             app.ElementTypeDropDownLabel.Text = 'Element Type';
 
             % Create ElementType
             app.ElementType = uidropdown(app.UIFigure);
             app.ElementType.Items = {'2DTR3N', '2DQU4N'};
             app.ElementType.ValueChangedFcn = createCallbackFcn(app, @ElementTypeValueChanged, true);
-            app.ElementType.Position = [144 283 82 22];
+            app.ElementType.Position = [250 355 82 22];
             app.ElementType.Value = '2DTR3N';
 
             % Create MeshCriteriaLabel
             app.MeshCriteriaLabel = uilabel(app.UIFigure);
             app.MeshCriteriaLabel.FontWeight = 'bold';
-            app.MeshCriteriaLabel.Position = [50 443 81 22];
+            app.MeshCriteriaLabel.Position = [50 445 81 22];
             app.MeshCriteriaLabel.Text = 'Mesh Criteria';
 
             % Create Button
             app.Button = uibutton(app.UIFigure, 'push');
             app.Button.Icon = 'circle.png';
-            app.Button.Position = [48 349 104 87];
+            app.Button.Position = [48 351 104 87];
             app.Button.Text = '';
 
             % Create eEditFieldLabel
             app.eEditFieldLabel = uilabel(app.UIFigure);
             app.eEditFieldLabel.HorizontalAlignment = 'right';
-            app.eEditFieldLabel.Position = [157 324 25 22];
+            app.eEditFieldLabel.Position = [157 326 25 22];
             app.eEditFieldLabel.Text = 'e';
 
             % Create e
             app.e = uieditfield(app.UIFigure, 'numeric');
-            app.e.Position = [197 324 36 22];
+            app.e.Position = [197 326 36 22];
             app.e.Value = 0.2;
 
             % Create UIAxes
@@ -300,47 +305,47 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.UIAxes.YColor = 'none';
             app.UIAxes.YTick = [];
             app.UIAxes.ZColor = 'none';
-            app.UIAxes.Position = [344 304 150 150];
+            app.UIAxes.Position = [344 306 150 150];
 
             % Create GenerateButton
             app.GenerateButton = uibutton(app.UIFigure, 'push');
             app.GenerateButton.ButtonPushedFcn = createCallbackFcn(app, @GenerateButtonPushed, true);
-            app.GenerateButton.Position = [514 381 100 22];
+            app.GenerateButton.Position = [514 383 100 22];
             app.GenerateButton.Text = 'Generate';
 
             % Create ElementsEditFieldLabel
             app.ElementsEditFieldLabel = uilabel(app.UIFigure);
             app.ElementsEditFieldLabel.HorizontalAlignment = 'right';
-            app.ElementsEditFieldLabel.Position = [514 443 62 22];
+            app.ElementsEditFieldLabel.Position = [514 445 62 22];
             app.ElementsEditFieldLabel.Text = '#Elements';
 
             % Create Elements
             app.Elements = uieditfield(app.UIFigure, 'numeric');
             app.Elements.Editable = 'off';
-            app.Elements.Position = [514 421 100 23];
+            app.Elements.Position = [514 423 100 23];
 
             % Create NodesEditField_2Label
             app.NodesEditField_2Label = uilabel(app.UIFigure);
             app.NodesEditField_2Label.HorizontalAlignment = 'right';
-            app.NodesEditField_2Label.Position = [514 341 47 22];
+            app.NodesEditField_2Label.Position = [514 343 47 22];
             app.NodesEditField_2Label.Text = '#Nodes';
 
             % Create Nodes
             app.Nodes = uieditfield(app.UIFigure, 'numeric');
             app.Nodes.Editable = 'off';
-            app.Nodes.Position = [514 321 100 21];
+            app.Nodes.Position = [514 323 100 21];
 
             % Create MeshRefinementSliderLabel
             app.MeshRefinementSliderLabel = uilabel(app.UIFigure);
             app.MeshRefinementSliderLabel.HorizontalAlignment = 'right';
-            app.MeshRefinementSliderLabel.Position = [261 262 100 22];
+            app.MeshRefinementSliderLabel.Position = [48 293 100 22];
             app.MeshRefinementSliderLabel.Text = 'Mesh Refinement';
 
             % Create MeshRefinementSlider
             app.MeshRefinementSlider = uislider(app.UIFigure);
             app.MeshRefinementSlider.Limits = [0 20];
             app.MeshRefinementSlider.ValueChangedFcn = createCallbackFcn(app, @MeshRefinementSliderValueChanged, true);
-            app.MeshRefinementSlider.Position = [382 271 150 3];
+            app.MeshRefinementSlider.Position = [169 302 150 3];
 
             % Create UIAxes_2
             app.UIAxes_2 = uiaxes(app.UIFigure);
@@ -353,12 +358,12 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.UIAxes_2.YColor = 'none';
             app.UIAxes_2.YTick = [];
             app.UIAxes_2.ZColor = 'none';
-            app.UIAxes_2.Position = [344 30 200 150];
+            app.UIAxes_2.Position = [428 23 200 150];
 
             % Create Plot
             app.Plot = uibutton(app.UIFigure, 'push');
             app.Plot.ButtonPushedFcn = createCallbackFcn(app, @PlotButtonPushed, true);
-            app.Plot.Position = [58 122 100 22];
+            app.Plot.Position = [575 222 72 22];
             app.Plot.Text = 'Plot';
 
             % Create ColorbarButtonGroup
@@ -366,7 +371,7 @@ classdef FEMGui_2 < matlab.apps.AppBase
             app.ColorbarButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ColorbarButtonGroupSelectionChanged, true);
             app.ColorbarButtonGroup.TitlePosition = 'centertop';
             app.ColorbarButtonGroup.Title = 'Colorbar';
-            app.ColorbarButtonGroup.Position = [181 74 122.992713928223 105.997970581055];
+            app.ColorbarButtonGroup.Position = [271 67 122.992713928223 105.997970581055];
 
             % Create Button_2
             app.Button_2 = uitogglebutton(app.ColorbarButtonGroup);
@@ -385,12 +390,41 @@ classdef FEMGui_2 < matlab.apps.AppBase
             % Create MaterialPropertieskEditFieldLabel
             app.MaterialPropertieskEditFieldLabel = uilabel(app.UIFigure);
             app.MaterialPropertieskEditFieldLabel.HorizontalAlignment = 'right';
-            app.MaterialPropertieskEditFieldLabel.Position = [35 241 123 22];
+            app.MaterialPropertieskEditFieldLabel.Position = [30 233 123 22];
             app.MaterialPropertieskEditFieldLabel.Text = 'Material Properties (k)';
 
             % Create MaterialPropertieskEditField
             app.MaterialPropertieskEditField = uieditfield(app.UIFigure, 'numeric');
-            app.MaterialPropertieskEditField.Position = [35 220 100 22];
+            app.MaterialPropertieskEditField.Position = [41 212 100 22];
+
+            % Create PreProcessLabel
+            app.PreProcessLabel = uilabel(app.UIFigure);
+            app.PreProcessLabel.FontWeight = 'bold';
+            app.PreProcessLabel.Position = [261 461 75 22];
+            app.PreProcessLabel.Text = 'Pre-Process';
+
+            % Create TemperatureMagnitudeEditFieldLabel
+            app.TemperatureMagnitudeEditFieldLabel = uilabel(app.UIFigure);
+            app.TemperatureMagnitudeEditFieldLabel.HorizontalAlignment = 'right';
+            app.TemperatureMagnitudeEditFieldLabel.Position = [412 233 132 22];
+            app.TemperatureMagnitudeEditFieldLabel.Text = 'Temperature Magnitude';
+
+            % Create TemperatureMagnitudeEditField
+            app.TemperatureMagnitudeEditField = uieditfield(app.UIFigure, 'numeric');
+            app.TemperatureMagnitudeEditField.Position = [428 212 100 22];
+
+            % Create UIAxes_3
+            app.UIAxes_3 = uiaxes(app.UIFigure);
+            title(app.UIAxes_3, '')
+            xlabel(app.UIAxes_3, '')
+            ylabel(app.UIAxes_3, '')
+            app.UIAxes_3.GridColor = [0 0 0];
+            app.UIAxes_3.XColor = 'none';
+            app.UIAxes_3.XTick = [];
+            app.UIAxes_3.YColor = 'none';
+            app.UIAxes_3.YTick = [];
+            app.UIAxes_3.ZColor = 'none';
+            app.UIAxes_3.Position = [30 23 200 150];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
